@@ -1,0 +1,9 @@
+# CPU/MPS (Apple Silicon): `pip install -r requirements.txt` is enough.
+# NVIDIA lab GPU: install the CUDA build of torch first (see
+# https://pytorch.org/get-started/locally/), then install this file.
+torch>=2.1
+torch_geometric>=2.4
+scipy  # needed by PyG to read the Planetoid (Cora) raw files
+numpy
+matplotlib  # charts in scripts/summarize_gcn_results.py (optional: tables still work without it)
+pytest
