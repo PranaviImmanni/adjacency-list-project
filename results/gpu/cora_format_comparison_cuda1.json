@@ -1,0 +1,56 @@
+{
+  "dataset": "cora",
+  "checkpoint": "checkpoints/cora_seed42_gpu.pt",
+  "reference_format": "coo",
+  "device": "cuda:1",
+  "device_type": "cuda",
+  "torch_version": "2.14.1+cu130",
+  "cuda_version": "13.0",
+  "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.39",
+  "device_name": "NVIDIA GeForce RTX 3090",
+  "all_equivalent": true,
+  "formats": {
+    "dense": {
+      "test_accuracy": 0.8209999799728394,
+      "reference_test_accuracy": 0.8209999799728394,
+      "accuracy_difference_pp": 0.0,
+      "prediction_agreement_all": 1.0,
+      "prediction_agreement_test": 1.0,
+      "mean_abs_logit_diff": 2.1629716228598606e-08,
+      "max_abs_logit_diff": 9.5367431640625e-07,
+      "allclose": true,
+      "atol": 1e-05,
+      "rtol": 0.0001,
+      "adjacency_bytes": 29333056,
+      "equivalent": true
+    },
+    "coo": {
+      "test_accuracy": 0.8209999799728394,
+      "reference_test_accuracy": 0.8209999799728394,
+      "accuracy_difference_pp": 0.0,
+      "prediction_agreement_all": 1.0,
+      "prediction_agreement_test": 1.0,
+      "mean_abs_logit_diff": 0.0,
+      "max_abs_logit_diff": 0.0,
+      "allclose": true,
+      "atol": 1e-05,
+      "rtol": 0.0001,
+      "adjacency_bytes": 265280,
+      "equivalent": true
+    },
+    "csr": {
+      "test_accuracy": 0.8209999799728394,
+      "reference_test_accuracy": 0.8209999799728394,
+      "accuracy_difference_pp": 0.0,
+      "prediction_agreement_all": 1.0,
+      "prediction_agreement_test": 1.0,
+      "mean_abs_logit_diff": 2.9912375276867006e-08,
+      "max_abs_logit_diff": 7.152557373046875e-07,
+      "allclose": true,
+      "atol": 1e-05,
+      "rtol": 0.0001,
+      "adjacency_bytes": 180840,
+      "equivalent": true
+    }
+  }
+}
