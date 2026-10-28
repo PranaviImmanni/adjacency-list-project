@@ -23,25 +23,18 @@ def run_inference(model, x, adj):
         return model(x, adj)
 
 
-def compare_to_reference(ref_logits, logits, y, test_mask, atol=ATOL, rtol=RTOL):
-    """Equivalence of `logits` against the reference (COO) logits.
+def compare_logits(ref_logits, logits, atol=ATOL, rtol=RTOL):
+    """Label-free equivalence of `logits` against the reference logits (all nodes).
 
-    All inputs are moved to CPU first. Agreement is reported on all nodes
-    and on the test nodes. Cosine similarity is deliberately not used:
-    max/mean absolute difference and allclose are stricter.
+    Used directly for synthetic graphs, which have no labels. Cosine
+    similarity is deliberately not used: max/mean absolute difference and
+    allclose are stricter.
     """
-    ref_logits, logits, y, test_mask = (t.detach().cpu() for t in (ref_logits, logits, y, test_mask))
-    ref_pred, pred = ref_logits.argmax(dim=1), logits.argmax(dim=1)
+    ref_logits, logits = ref_logits.detach().cpu(), logits.detach().cpu()
     abs_diff = (logits.double() - ref_logits.double()).abs()
-
-    ref_acc = accuracy(ref_logits, y, test_mask)
-    test_acc = accuracy(logits, y, test_mask)
     return {
-        "test_accuracy": test_acc,
-        "reference_test_accuracy": ref_acc,
-        "accuracy_difference_pp": 100.0 * (test_acc - ref_acc),
-        "prediction_agreement_all": prediction_match_rate(pred.numpy(), ref_pred.numpy()),
-        "prediction_agreement_test": prediction_match_rate(pred[test_mask].numpy(), ref_pred[test_mask].numpy()),
+        "prediction_agreement_all": prediction_match_rate(logits.argmax(dim=1).numpy(),
+                                                          ref_logits.argmax(dim=1).numpy()),
         "mean_abs_logit_diff": abs_diff.mean().item(),
         "max_abs_logit_diff": output_closeness(logits.numpy(), ref_logits.numpy(), metric="max_abs_diff"),
         "allclose": bool(torch.allclose(logits, ref_logits, atol=atol, rtol=rtol)),
@@ -50,8 +43,25 @@ def compare_to_reference(ref_logits, logits, y, test_mask, atol=ATOL, rtol=RTOL)
     }
 
 
+def compare_to_reference(ref_logits, logits, y, test_mask, atol=ATOL, rtol=RTOL):
+    """compare_logits plus test accuracy and test-node agreement, for labeled datasets."""
+    ref_logits, logits, y, test_mask = (t.detach().cpu() for t in (ref_logits, logits, y, test_mask))
+    ref_pred, pred = ref_logits.argmax(dim=1), logits.argmax(dim=1)
+
+    ref_acc = accuracy(ref_logits, y, test_mask)
+    test_acc = accuracy(logits, y, test_mask)
+    return {
+        "test_accuracy": test_acc,
+        "reference_test_accuracy": ref_acc,
+        "accuracy_difference_pp": 100.0 * (test_acc - ref_acc),
+        "prediction_agreement_test": prediction_match_rate(pred[test_mask].numpy(), ref_pred[test_mask].numpy()),
+        **compare_logits(ref_logits, logits, atol, rtol),
+    }
+
+
 def is_equivalent(metrics):
-    """The correctness target: identical labels, identical accuracy, logits within tolerance."""
+    """The correctness target: identical labels, logits within tolerance, and
+    (for labeled datasets) identical accuracy."""
     return (metrics["prediction_agreement_all"] == 1.0
-            and metrics["accuracy_difference_pp"] == 0.0
+            and metrics.get("accuracy_difference_pp", 0.0) == 0.0
             and metrics["allclose"])

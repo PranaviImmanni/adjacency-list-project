@@ -1,7 +1,7 @@
 """Dataset loaders that return a format-agnostic GraphData.
 
 The GCN code only depends on GraphData, never on PyG/Cora-specific objects,
-so new sources (the partner's synthetic generator, OGB datasets) only need a
+so new sources (e.g. OGB datasets) only need a
 new loader registered in LOADERS.
 """
 
@@ -65,8 +65,8 @@ def load_cora(root=DATA_ROOT):
     )
 
 
-# Extension point: add "synthetic" (adapter over src/synthetic/generator.py)
-# and "ogbn-arxiv" loaders here.
+# Extension point: add "ogbn-arxiv" here. Synthetic graphs are unlabeled and
+# built directly by scripts/benchmark_synthetic.py (src/synthetic/edge_generator.py).
 LOADERS = {
     "cora": load_cora,
 }

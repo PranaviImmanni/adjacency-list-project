@@ -19,11 +19,13 @@ specification of how memory is measured and how equivalence is checked.
   (starting with multiplication).
 - `src/measurement/` — memory measurement and equivalence-check
   utilities (`memory_utils.py`).
-- `src/synthetic/` — synthetic dataset generator, used to validate the
-  pipeline before running on real datasets.
+- `src/synthetic/` — synthetic graph generators: `generator.py` (small
+  dense matrices for conversion tests) and `edge_generator.py` (G(n, m)
+  edge lists for the GCN size and density sweeps).
 - `src/gcn/` — device-portable two-layer GCN that runs on dense, COO, or
   CSR normalized adjacency (see `docs/gcn_inference_plan.md`).
-- `scripts/` — GCN entry points: train, compare formats, benchmark.
+- `scripts/` — GCN entry points: train, compare formats, benchmark,
+  synthetic sweeps (`run_synthetic_sweep.py`).
 - `configs/` — experiment configs (`gcn_baseline.json`).
 - `tests/` — round-trip correctness tests and equivalence tests.
 - `docs/` — formalization write-up and `memory_eval_spec.md`.
@@ -90,6 +92,20 @@ pip install -r requirements.txt
    `latency_is_debug_only: true`. Official latency and GPU-memory results
    will be collected later on the lab NVIDIA GPU by running the same
    commands with `--device cuda:0`. See `docs/gcn_inference_plan.md` §5.
+
+### GCN: synthetic size and density sweeps
+
+These use random G(n, m) graphs and an untrained GCN with fixed random weights,
+so no checkpoint is needed. Each run is checked against COO on CPU. Run the
+pilot first, then the two sweeps. Each command writes JSON files to
+`results/synthetic/<sweep>_<device>/`, and you can rerun a command to resume
+it. See `docs/gcn_inference_plan.md` §8.
+
+```bash
+python scripts/run_synthetic_sweep.py --sweep pilot --device cuda:0
+python scripts/run_synthetic_sweep.py --sweep size --device cuda:0
+python scripts/run_synthetic_sweep.py --sweep density --device cuda:0
+```
 
 ### Existing utilities
 

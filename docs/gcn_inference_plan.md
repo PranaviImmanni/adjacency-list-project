@@ -132,7 +132,7 @@ Not implemented yet. Each has a planned extension point:
 | GraphSAGE, GAT | a new model in `src/gcn/` (or a sibling package) that reuses `adjacency_multiply` |
 | FP16 / BF16 / AMP | `SUPPORTED_DTYPES` in `src/gcn/config.py` |
 | Custom CUDA kernels, Tensor Core/MMA, CUTLASS, other formats (CSC/BSR) | `STORAGE_FORMATS` + `adjacency_multiply` |
-| Synthetic sweeps, maximum-capacity search | a loop that calls `benchmark_gcn.py` once per configuration |
+| Maximum-capacity search (size sweep toward the GPU memory limit) | `scripts/run_synthetic_sweep.py` (see section 8) |
 | ogbn-arxiv | a loader in `LOADERS` (`src/gcn/datasets.py`) |
 | Automatic format selection | reads the benchmark JSON results |
 
@@ -150,9 +150,72 @@ Not implemented yet. Each has a planned extension point:
   and Strassen are **not** used in the GCN forward pass. The GCN baseline uses
   PyTorch's own dense and sparse kernels, so it stays a clean reference that those
   operations can be checked against later.
-- Synthetic graphs: a later `synthetic` loader in `src/gcn/datasets.py` will
-  adapt `generate_synthetic_graph` (dense N x N) into a `GraphData` (nonzeros ->
-  `edge_index`), rather than writing a second generator.
+- Synthetic graphs come from `src/synthetic/edge_generator.py`, not
+  `generate_synthetic_graph`. That generator builds a dense, directed N x N
+  matrix, which costs O(N^2) memory and roughly doubles the edge density once
+  `build_normalized_coo` symmetrizes it (see section 8).
 - Equivalence follows the three checks in `memory_eval_spec.md`: prediction
   match, accuracy parity and output closeness. The tolerance is stricter here
   because the same checkpoint is used for every format.
+
+## 8. Synthetic sweeps
+
+Cora is one point: 2,708 nodes at 0.14% density. The synthetic sweeps change one
+variable at a time to show where the formats cross over.
+
+| Sweep | Changes | Fixed | Values | Graph seeds |
+|---|---|---|---|---|
+| pilot | nothing | everything | 1,000 nodes, average degree 8 | 42 |
+| size | number of nodes | average degree 8 | 1k, 5k, 10k, 20k, 40k | 42, 43, 44 |
+| density | % of possible edges | 5,000 nodes | 0.1, 1, 5, 10, 20, 30, 35, 40% | 42, 43, 44 |
+
+**Graphs.** Uniform random G(n, m) (`sample_undirected_edges`): exactly m
+distinct undirected pairs, drawn without replacement, stored once as
+(i, j) with i < j, with no self-loops. Memory is O(m); it never builds all
+N(N-1)/2 pairs.
+- Average degree d = average neighbors before self-loops, so m = N*d/2.
+- Density = m / (N(N-1)/2).
+- After `build_normalized_coo(edge_index, N)`, nnz = 2m + N. The benchmark
+  checks this, and passing N keeps isolated nodes.
+
+**Model and seeds.** No training: the same two-layer GCN with random Glorot
+weights. Input 64, hidden 64 (from the config), output 7. Features are
+standard normal. There are three independent, recorded seeds:
+- graph seed: varies across official runs;
+- feature seed: fixed at 0;
+- model seed: fixed at 1.
+
+The graph and features use their own `torch.Generator`. The model is seeded
+just before it is built. So changing the graph never changes the features or
+the weights.
+
+**Equivalence.** There are no labels, so `compare_logits` checks the logits
+against COO on CPU. It requires 100% argmax agreement on all nodes and
+`allclose(atol=1e-5, rtol=1e-4)`, the same tolerance as Cora. Failures are
+reported, not hidden by loosening the tolerance.
+
+**Measurement.** `scripts/benchmark_synthetic.py` runs one (graph, format,
+repetition) per process and regenerates the graph from its seed.
+`graph_fingerprint` records a hash of the edges, so it can be checked that
+every format saw the same graph. Timing, memory and the JSON fields otherwise
+match `benchmark_gcn.py`. `scripts/run_synthetic_sweep.py` runs a whole sweep
+and resumes where it stopped.
+
+**Storage crossovers** (adjacency bytes only, FP32 values, int64 indices):
+- COO: 20 bytes/nnz, so it matches dense near 20% density.
+- CSR: 12 bytes/nnz + 8(N+1), so it matches dense near 33%.
+
+These do not predict latency or total peak memory. The 30% and 35% density
+points bracket the CSR crossover.
+
+**Memory limit.** Dense adjacency needs 4N^2 bytes: 6.4 GB at 40k nodes and
+22.5 GB (about 21 GiB) at 75k. That is a lower bound on what a run needs:
+features, intermediate results, allocator overhead and other processes add to
+it. Dense is built on CPU and then copied, so the host also needs 4N^2 bytes
+of RAM. Densifying a CUDA tensor would put that cost on the GPU instead. Going
+beyond 40k nodes (the capacity search) needs explicit pre-checks against free
+GPU memory first.
+
+**Future work.** G(n, m) degrees are nearly uniform. Real graphs have skewed
+degrees, which affects how evenly sparse GPU kernels spread their work.
+Power-law graphs are a follow-up and are not part of these sweeps.
