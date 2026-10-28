@@ -107,6 +107,14 @@ python scripts/run_synthetic_sweep.py --sweep size --device cuda:0
 python scripts/run_synthetic_sweep.py --sweep density --device cuda:0
 ```
 
+To get tables, crossover points and charts for every sweep folder, run the
+command below. It writes `results/synthetic/summary/summary.md` and the PNG
+charts:
+
+```bash
+python scripts/summarize_synthetic_results.py
+```
+
 ### Existing utilities
 
 ```bash
