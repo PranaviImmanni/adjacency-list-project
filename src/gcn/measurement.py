@@ -76,11 +76,16 @@ def cuda_memory_stats(device):
     return {"allocated_bytes": None, "peak_allocated_bytes": None, "peak_reserved_bytes": None}
 
 
-def time_forward(model, x, adj, device, warmup_runs, measured_runs):
+def time_forward(model, x, adj, device, warmup_runs, measured_runs, reset_peak_after_warmup=False):
     """Run warm-up passes, then time each measured forward pass in milliseconds.
 
     The device is synchronized before the clock starts and before it stops,
     so asynchronous CUDA work is included in each sample.
+
+    reset_peak_after_warmup: reset the CUDA peak-memory counters after the
+    warm-up outputs are released, right before the measured passes. The peak
+    then covers only the measured phase (it still includes every resident
+    tensor: adjacency, features and parameters).
 
     Returns (logits from the last pass, list of per-run latencies in ms).
     """
@@ -88,8 +93,10 @@ def time_forward(model, x, adj, device, warmup_runs, measured_runs):
     times_ms = []
     with torch.inference_mode():
         for _ in range(warmup_runs):
-            model(x, adj)
+            model(x, adj)  # output not kept, so it is freed right away
         synchronize(device)
+        if reset_peak_after_warmup:
+            reset_peak_memory(device)
         for _ in range(measured_runs):
             start = time.perf_counter()
             logits = model(x, adj)

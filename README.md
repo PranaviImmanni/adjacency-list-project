@@ -23,9 +23,12 @@ specification of how memory is measured and how equivalence is checked.
   dense matrices for conversion tests) and `edge_generator.py` (G(n, m)
   edge lists for the GCN size and density sweeps).
 - `src/gcn/` — device-portable two-layer GCN that runs on dense, COO, or
-  CSR normalized adjacency (see `docs/gcn_inference_plan.md`).
+  CSR normalized adjacency (see `docs/gcn_inference_plan.md`), plus edge
+  pruning (`pruning.py`) and error analysis (`error_analysis.py`, see
+  `docs/pruning_and_error_analysis.md`).
 - `scripts/` — GCN entry points: train, compare formats, benchmark,
-  synthetic sweeps (`run_synthetic_sweep.py`).
+  synthetic sweeps (`run_synthetic_sweep.py`), pruning
+  (`run_pruning_experiments.py`).
 - `configs/` — experiment configs (`gcn_baseline.json`).
 - `tests/` — round-trip correctness tests and equivalence tests.
 - `docs/` — formalization write-up and `memory_eval_spec.md`.
@@ -113,6 +116,24 @@ charts:
 
 ```bash
 python scripts/summarize_synthetic_results.py
+```
+
+### GCN: PubMed, edge pruning and error analysis
+
+PubMed uses the same model and procedure as Cora. Pruning removes unique
+undirected edges, either at random (pruning seeds 101–103) or least
+feature-similar first. It then re-evaluates each dataset's one frozen checkpoint
+with CSR at 0/10/25/50/75% removal and reports accuracy loss, prediction
+disagreement, memory, latency and a prediction-margin analysis. The method,
+fixed settings, theory and full reproduction commands are in
+`docs/pruning_and_error_analysis.md`. Short version, on the lab GPU:
+
+```bash
+python scripts/run_pruning_experiments.py --dataset cora --stage full --device cuda:1
+python scripts/run_pruning_experiments.py --dataset cora --stage verify --device cuda:1
+python scripts/train_gcn.py --dataset pubmed --device cuda:1 --output checkpoints/pubmed_seed42_gpu.pt
+# ...PubMed format comparison and benchmarks (see the doc), then the same two stages with --dataset pubmed
+python scripts/summarize_pruning_results.py   # writes results/pruning/summary/
 ```
 
 ### Existing utilities

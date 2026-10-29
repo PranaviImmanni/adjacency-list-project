@@ -115,6 +115,16 @@ def adjacency_storage_breakdown(adj):
     raise ValueError(f"unsupported adjacency layout {adj.layout}")
 
 
+def adjacency_dtypes(adj):
+    """Value and index dtypes of an adjacency representation (index is None for dense)."""
+    if adj.layout == torch.strided:
+        return {"value_dtype": str(adj.dtype).removeprefix("torch."), "index_dtype": None}
+    indices = adj._indices() if adj.layout == torch.sparse_coo else adj.col_indices()
+    values = adj._values() if adj.layout == torch.sparse_coo else adj.values()
+    return {"value_dtype": str(values.dtype).removeprefix("torch."),
+            "index_dtype": str(indices.dtype).removeprefix("torch.")}
+
+
 def adjacency_storage_bytes(adj):
     """Exact bytes of all component tensors (numel * element_size)."""
     return sum(adjacency_storage_breakdown(adj).values())

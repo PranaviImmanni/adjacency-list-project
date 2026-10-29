@@ -10,6 +10,8 @@ changes between runs is the adjacency layout. PyG's GCNConv is deliberately
 not used, to keep that comparison controlled.
 """
 
+import hashlib
+
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -61,3 +63,19 @@ def load_gcn_checkpoint(path, device="cpu"):
     model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()
     return model.to(torch.device(device)), checkpoint
+
+
+def checkpoint_identity(path, checkpoint):
+    """What a result file needs to identify the frozen checkpoint it used."""
+    with open(path, "rb") as f:
+        digest = hashlib.sha256(f.read()).hexdigest()[:16]
+    return {
+        "path": str(path),
+        "sha256": digest,
+        "dataset": checkpoint.get("dataset"),
+        "model_seed": checkpoint["seed"],
+        "best_epoch": checkpoint["best_epoch"],
+        "best_validation_accuracy": checkpoint["best_validation_accuracy"],
+        "saved_test_accuracy": checkpoint["test_accuracy"],
+        "train_adjacency_format": checkpoint.get("train_adjacency_format"),
+    }

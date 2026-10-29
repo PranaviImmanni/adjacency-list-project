@@ -119,7 +119,7 @@ Steps on the lab GPU:
 ## 6. Scope boundaries
 
 In scope now:
-- Cora
+- Cora, and PubMed with edge pruning (see `pruning_and_error_analysis.md`)
 - FP32
 - One two-layer GCN
 - Dense, COO and CSR formats
@@ -133,7 +133,7 @@ Not implemented yet. Each has a planned extension point:
 | FP16 / BF16 / AMP | `SUPPORTED_DTYPES` in `src/gcn/config.py` |
 | Custom CUDA kernels, Tensor Core/MMA, CUTLASS, other formats (CSC/BSR) | `STORAGE_FORMATS` + `adjacency_multiply` |
 | Maximum-capacity search (size sweep toward the GPU memory limit) | `scripts/run_synthetic_sweep.py` (see section 8) |
-| ogbn-arxiv | a loader in `LOADERS` (`src/gcn/datasets.py`) |
+| ogbn-arxiv | a loader in `LOADERS` (`src/gcn/datasets.py`; PubMed was added this way) |
 | Automatic format selection | reads the benchmark JSON results |
 
 ## 7. How this fits with the existing work

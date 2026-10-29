@@ -3,6 +3,11 @@
 The GCN code only depends on GraphData, never on PyG/Cora-specific objects,
 so new sources (e.g. OGB datasets) only need a
 new loader registered in LOADERS.
+
+Cora and PubMed use the public Planetoid split. DATASET_METADATA records what
+each dataset actually provides; `available_fields` is read from the loaded
+data at run time. Anything not listed there (publication years, edge
+weights or confidence, raw text) does not exist in these datasets.
 """
 
 from dataclasses import dataclass
@@ -26,6 +31,7 @@ class GraphData:
     num_nodes: int
     num_features: int
     num_classes: int
+    available_fields: tuple = ()  # attributes present in the source data object
 
     def summary(self):
         return {
@@ -39,20 +45,44 @@ class GraphData:
             "num_test": int(self.test_mask.sum()),
         }
 
+    def metadata(self):
+        """summary() plus the fields present in the source data and what they contain."""
+        return {**self.summary(), "available_fields": list(self.available_fields),
+                **DATASET_METADATA.get(self.name, {})}
 
-def load_cora(root=DATA_ROOT):
-    """Cora (Planetoid public split) with row-normalized node features.
 
-    Downloads to data/Planetoid/Cora on first use.
+DATASET_METADATA = {
+    "cora": {
+        "source": "Planetoid (Yang et al., 2016), public split",
+        "node_features": "binary bag-of-words over a 1,433-word vocabulary, row-normalized",
+        "classes": "7 machine-learning paper topics",
+        "edges": "citations, unweighted; stored directed in both directions",
+        "not_available": "publication years, edge weights or confidence, raw text",
+    },
+    "pubmed": {
+        "source": "Planetoid (Yang et al., 2016), public split",
+        "node_features": "TF-IDF weights over a 500-word vocabulary, row-normalized",
+        "classes": "3 diabetes categories of PubMed papers",
+        "edges": "citations, unweighted; stored directed in both directions",
+        "not_available": "publication years, edge weights or confidence, raw text",
+    },
+}
+
+
+def load_planetoid(name, pyg_name, root=DATA_ROOT):
+    """A Planetoid dataset (public split) with row-normalized node features.
+
+    Downloads to data/Planetoid/<pyg_name> on first use. Feature and class
+    counts come from the dataset, not from constants.
     """
     # Imported lazily so the offline unit tests don't need PyG at import time.
     from torch_geometric.datasets import Planetoid
     from torch_geometric.transforms import NormalizeFeatures
 
-    dataset = Planetoid(root=str(root / "Planetoid"), name="Cora", transform=NormalizeFeatures())
+    dataset = Planetoid(root=str(root / "Planetoid"), name=pyg_name, split="public", transform=NormalizeFeatures())
     data = dataset[0]
     return GraphData(
-        name="cora",
+        name=name,
         x=data.x,
         edge_index=data.edge_index,
         y=data.y,
@@ -62,13 +92,23 @@ def load_cora(root=DATA_ROOT):
         num_nodes=data.num_nodes,
         num_features=dataset.num_features,
         num_classes=dataset.num_classes,
+        available_fields=tuple(sorted(data.keys())),
     )
+
+
+def load_cora(root=DATA_ROOT):
+    return load_planetoid("cora", "Cora", root)
+
+
+def load_pubmed(root=DATA_ROOT):
+    return load_planetoid("pubmed", "PubMed", root)
 
 
 # Extension point: add "ogbn-arxiv" here. Synthetic graphs are unlabeled and
 # built directly by scripts/benchmark_synthetic.py (src/synthetic/edge_generator.py).
 LOADERS = {
     "cora": load_cora,
+    "pubmed": load_pubmed,
 }
 
 

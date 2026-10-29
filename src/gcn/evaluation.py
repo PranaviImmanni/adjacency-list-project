@@ -53,7 +53,7 @@ def compare_to_reference(ref_logits, logits, y, test_mask, atol=ATOL, rtol=RTOL)
     return {
         "test_accuracy": test_acc,
         "reference_test_accuracy": ref_acc,
-        "accuracy_difference_pp": 100.0 * (test_acc - ref_acc),
+        "accuracy_difference_pp": 100.0 * (test_acc - ref_acc),  # signed: format minus reference
         "prediction_agreement_test": prediction_match_rate(pred[test_mask].numpy(), ref_pred[test_mask].numpy()),
         **compare_logits(ref_logits, logits, atol, rtol),
     }
