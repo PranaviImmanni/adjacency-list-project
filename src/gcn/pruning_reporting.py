@@ -119,9 +119,12 @@ def aggregate_conditions(runs):
             "order_ms": timing("order_ms"),
             "prep_ms": timing("selection_ms") + timing("normalization_ms") + timing("conversion_ms"),
             "transfer_ms": timing("transfer_ms"),
-            "logits_consistent": len({r["logits_sha256"] for r in reps}) == 1,
-            "original_logits_shas": {r["original_logits_sha256"] for r in reps},
-            "logits_sha": first["logits_sha256"],
+            # GPU sparse kernels are not bit-reproducible across processes, so compare the
+            # metrics, not the logit hashes (run_to_run_variation measures the logits).
+            "metrics_consistent": len({(r["accuracy"]["val"], r["accuracy"]["test"],
+                                        r["pruning_effect"]["prediction_disagreement_all"],
+                                        r["pruning_effect"]["prediction_disagreement_test"]) for r in reps}) == 1,
+            "bit_identical_reps": len({r["logits_sha256"] for r in reps}) == 1,
             "format_equivalent": all(r["format_check"]["equivalent"] for r in reps),
             "logits_file": next((r["logits_file"] for r in reps if r.get("logits_file")), None),
             "device": first["device"], "device_name": first["device_name"],
@@ -191,6 +194,26 @@ def pruning_margin_rows(folder, dataset, conditions):
         rows.append({"name": condition_name(*key), **change, "loss_pp": loss_pp, "margin": margin,
                      "bound_holds": abs(loss_pp) <= 100 * margin["test"]["disagreement_rate"] + 1e-9})
     return rows
+
+
+def run_to_run_variation(folder, dataset, conditions):
+    """Max |logit difference| between the original-graph CSR logits computed in separate processes.
+
+    Every saved run also holds the original graph's logits from its own
+    process; they are compared with the original-graph run. Returns
+    (max abs difference, whether every process predicted the same classes), or None.
+    """
+    baseline = next(c for (m, _, _), c in conditions.items() if m == "none")
+    if not baseline["logits_file"]:
+        return None
+    reference = torch.load(Path(folder) / baseline["logits_file"], weights_only=True)["logits"].double()
+    worst, same_predictions = 0.0, True
+    for c in conditions.values():
+        if c["logits_file"]:
+            other = torch.load(Path(folder) / c["logits_file"], weights_only=True)["original_logits"].double()
+            worst = max(worst, (other - reference).abs().max().item())
+            same_predictions &= torch.equal(other.argmax(dim=1), reference.argmax(dim=1))
+    return worst, same_predictions
 
 
 def format_margin_rows(folder, verifications):
@@ -320,7 +343,8 @@ def pruning_epsilon_table(rows):
 # Charts
 # ---------------------------------------------------------------------------
 
-def method_chart(plt, path, series, title, subtitle, x_label, y_fmt, x_fmt, baseline=None, x_notes=None):
+def method_chart(plt, path, series, title, subtitle, x_label, y_fmt, x_fmt, baseline=None, x_notes=None,
+                 y_from_zero=False):
     """One line per pruning method with range whiskers and end labels.
 
     series: {method: [(x, y, low, high)]}. baseline: optional (label, y) drawn as
@@ -364,6 +388,8 @@ def method_chart(plt, path, series, title, subtitle, x_label, y_fmt, x_fmt, base
         names.append(baseline[0])
 
     ax.margins(x=0.04, y=0.12)
+    if y_from_zero:
+        ax.set_ylim(bottom=0)
     ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: x_fmt(v)))
     ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: y_fmt(v)))
     ax.xaxis.set_minor_locator(NullLocator())
@@ -442,7 +468,7 @@ def pruning_charts(plt, out_dir, dataset, conditions):
               "CSR · torch.cuda.max_memory_allocated during the measured passes (adjacency + features + "
               "weights + temporaries) · random: median of seeds, whisker = seed range · both methods keep the "
               "same number of edges at each rate, so their lines can overlap",
-              removed, _mb, _removed_fmt)
+              removed, _mb, _removed_fmt, y_from_zero=True)
     latency_range = lambda c: (min(c["rep_medians"]), max(c["rep_medians"]))  # noqa: E731
     chart("latency_vs_removed",
           method_series(conditions, lambda c: c["latency"]["median"], spread=latency_range,
@@ -450,7 +476,7 @@ def pruning_charts(plt, out_dir, dataset, conditions):
           f"Inference latency vs edges removed · {dataset} · {device}",
           f"CSR · median of the {len(baseline['rep_medians'])} repetition medians (random: median over seeds too) "
           f"· whisker = range of repetition medians · {timing}",
-          removed, lambda v: f"{v:.3g} ms", _removed_fmt)
+          removed, lambda v: f"{v:.3g} ms", _removed_fmt, y_from_zero=True)
     if has_peak:
         series, notes = {}, {}
         for method, points in method_series(conditions, lambda c: 100 * c["test_acc"]).items():
@@ -575,13 +601,18 @@ def summarize_pruning(pruning_dir, formats_dir, out_dir):
         checks = [
             ("every pruning run matches COO on CPU for its own graph",
              all(c["format_equivalent"] for c in conditions.values())),
-            ("logits identical across repetitions", all(c["logits_consistent"] for c in conditions.values())),
-            ("original-graph logits identical in every run",
-             len(set().union(*(c["original_logits_shas"] for c in conditions.values()))) == 1
-             and baseline["logits_sha"] in baseline["original_logits_shas"]),
+            ("accuracy and disagreement identical across repetitions",
+             all(c["metrics_consistent"] for c in conditions.values())),
             ("same checkpoint in every run", len({c["checkpoint"]["sha256"] for c in conditions.values()}) == 1),
         ]
         lines = [f"- {name}: {_yes_no(ok)}" for name, ok in checks]
+        bit_identical = sum(c["bit_identical_reps"] for c in conditions.values())
+        lines.append(f"- logits bit-identical across repetitions in {bit_identical} of {len(conditions)} conditions "
+                     "(sparse GPU kernels are not bit-reproducible between processes)")
+        variation = run_to_run_variation(pruning_dir / f"{dataset}_{device_tag}", dataset, conditions)
+        if variation:
+            lines.append(f"- original-graph logits recomputed in every run: max difference between processes "
+                         f"{variation[0]:.1e}, identical predictions: {_yes_no(variation[1])}")
         text += ["Checks:", *lines, ""]
         md += ["### Checks", "", *lines, ""]
 

@@ -118,7 +118,7 @@ def main():
                        "--output", str(output)]
             if seed is not None:
                 command += ["--prune-seed", str(seed)]
-            if rep == 0:  # logits are identical across repetitions (checked by logits_sha256)
+            if rep == 0:  # predictions are identical across repetitions; logits differ by ~1e-7 at most on GPU
                 command += ["--logits-out", str(output_dir / "logits" / f"{tag}_csr.pt")]
             if subprocess.run(command).returncode != 0:
                 failed.append(output.name)

@@ -1,0 +1,149 @@
+{
+  "dataset": "pubmed",
+  "checkpoint": "checkpoints/pubmed_seed42_gpu.pt",
+  "checkpoint_identity": {
+    "path": "checkpoints/pubmed_seed42_gpu.pt",
+    "sha256": "05dae13dd0ffa1bb",
+    "dataset": "pubmed",
+    "model_seed": 42,
+    "best_epoch": 59,
+    "best_validation_accuracy": 0.8080000281333923,
+    "saved_test_accuracy": 0.7970000505447388,
+    "train_adjacency_format": "coo"
+  },
+  "reference_format": "coo",
+  "device": "cuda:1",
+  "device_type": "cuda",
+  "torch_version": "2.14.1+cu130",
+  "cuda_version": "13.0",
+  "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.39",
+  "device_name": "NVIDIA GeForce RTX 3090",
+  "pruning": {
+    "method": "none",
+    "seed": null,
+    "requested_removal_fraction": 0.0,
+    "actual_removal_fraction": 0.0,
+    "original_unique_edges": 44324,
+    "retained_unique_edges": 44324,
+    "removed_unique_edges": 0
+  },
+  "graph": {
+    "num_nodes": 19717,
+    "unique_undirected_edges": 44324,
+    "normalized_nnz": 108365,
+    "density_excluding_self_loops": 0.00022803908825811382,
+    "isolated_nodes_before_self_loops": 0
+  },
+  "logits_file": null,
+  "all_equivalent": true,
+  "formats": {
+    "dense": {
+      "test_accuracy": 0.796999990940094,
+      "reference_test_accuracy": 0.796999990940094,
+      "accuracy_difference_pp": 0.0,
+      "prediction_agreement_test": 1.0,
+      "prediction_agreement_all": 1.0,
+      "mean_abs_logit_diff": 2.8597779738401426e-08,
+      "max_abs_logit_diff": 4.76837158203125e-07,
+      "allclose": true,
+      "atol": 1e-05,
+      "rtol": 0.0001,
+      "epsilon_logit": 4.76837158203125e-07,
+      "abs_accuracy_difference_pp": 0.0,
+      "margin": {
+        "all": {
+          "nodes": 19717,
+          "margin_condition_fraction": 1.0,
+          "disagreement_rate": 0.0,
+          "disagreements": 0,
+          "disagreements_satisfying_condition": 0,
+          "median_margin": 1.0567933022975922,
+          "max_node_epsilon": 4.76837158203125e-07
+        },
+        "test": {
+          "nodes": 1000,
+          "margin_condition_fraction": 1.0,
+          "disagreement_rate": 0.0,
+          "disagreements": 0,
+          "disagreements_satisfying_condition": 0,
+          "median_margin": 1.071555107831955,
+          "max_node_epsilon": 4.76837158203125e-07
+        }
+      },
+      "adjacency_bytes": 1555040356,
+      "equivalent": true
+    },
+    "coo": {
+      "test_accuracy": 0.796999990940094,
+      "reference_test_accuracy": 0.796999990940094,
+      "accuracy_difference_pp": 0.0,
+      "prediction_agreement_test": 1.0,
+      "prediction_agreement_all": 1.0,
+      "mean_abs_logit_diff": 0.0,
+      "max_abs_logit_diff": 0.0,
+      "allclose": true,
+      "atol": 1e-05,
+      "rtol": 0.0001,
+      "epsilon_logit": 0.0,
+      "abs_accuracy_difference_pp": 0.0,
+      "margin": {
+        "all": {
+          "nodes": 19717,
+          "margin_condition_fraction": 1.0,
+          "disagreement_rate": 0.0,
+          "disagreements": 0,
+          "disagreements_satisfying_condition": 0,
+          "median_margin": 1.0567933022975922,
+          "max_node_epsilon": 0.0
+        },
+        "test": {
+          "nodes": 1000,
+          "margin_condition_fraction": 1.0,
+          "disagreement_rate": 0.0,
+          "disagreements": 0,
+          "disagreements_satisfying_condition": 0,
+          "median_margin": 1.071555107831955,
+          "max_node_epsilon": 0.0
+        }
+      },
+      "adjacency_bytes": 2167300,
+      "equivalent": true
+    },
+    "csr": {
+      "test_accuracy": 0.796999990940094,
+      "reference_test_accuracy": 0.796999990940094,
+      "accuracy_difference_pp": 0.0,
+      "prediction_agreement_test": 1.0,
+      "prediction_agreement_all": 1.0,
+      "mean_abs_logit_diff": 3.4635230147891595e-08,
+      "max_abs_logit_diff": 9.5367431640625e-07,
+      "allclose": true,
+      "atol": 1e-05,
+      "rtol": 0.0001,
+      "epsilon_logit": 9.5367431640625e-07,
+      "abs_accuracy_difference_pp": 0.0,
+      "margin": {
+        "all": {
+          "nodes": 19717,
+          "margin_condition_fraction": 1.0,
+          "disagreement_rate": 0.0,
+          "disagreements": 0,
+          "disagreements_satisfying_condition": 0,
+          "median_margin": 1.0567933022975922,
+          "max_node_epsilon": 9.5367431640625e-07
+        },
+        "test": {
+          "nodes": 1000,
+          "margin_condition_fraction": 1.0,
+          "disagreement_rate": 0.0,
+          "disagreements": 0,
+          "disagreements_satisfying_condition": 0,
+          "median_margin": 1.071555107831955,
+          "max_node_epsilon": 4.76837158203125e-07
+        }
+      },
+      "adjacency_bytes": 1458124,
+      "equivalent": true
+    }
+  }
+}
