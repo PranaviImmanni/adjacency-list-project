@@ -1,0 +1,8 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {"name": "Test 1: correctness", "type": "debugpy", "request": "launch", "program": "${workspaceFolder}/hypergraph_tests.py", "args": ["test1"], "cwd": "${workspaceFolder}", "console": "integratedTerminal"},
+    {"name": "Test 2: explicit vs factorized", "type": "debugpy", "request": "launch", "program": "${workspaceFolder}/hypergraph_tests.py", "args": ["test2"], "cwd": "${workspaceFolder}", "console": "integratedTerminal"},
+    {"name": "Test 3: small scaling sweep", "type": "debugpy", "request": "launch", "program": "${workspaceFolder}/hypergraph_tests.py", "args": ["test3"], "cwd": "${workspaceFolder}", "console": "integratedTerminal"}
+  ]
+}

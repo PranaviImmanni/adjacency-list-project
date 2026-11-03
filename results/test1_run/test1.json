@@ -1,0 +1,1682 @@
+[
+  {
+    "case": "worked_example",
+    "features": 1,
+    "normalized": false,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 1,
+    "normalized": false,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 1,
+    "normalized": false,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 1,
+    "normalized": false,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 1,
+    "normalized": false,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 1,
+    "normalized": false,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 1,
+    "normalized": true,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 1.5954801257933582e-07,
+    "mean_abs_error": 8.746531765524423e-08,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 1,
+    "normalized": true,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 1.5954801257933582e-07,
+    "mean_abs_error": 8.746531765524423e-08,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 1,
+    "normalized": true,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 1.5954801257933582e-07,
+    "mean_abs_error": 8.746531765524423e-08,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 1,
+    "normalized": true,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 1.5954801257933582e-07,
+    "mean_abs_error": 8.746531765524423e-08,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 1,
+    "normalized": true,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 7.887056652222668e-08,
+    "mean_abs_error": 6.729595614096695e-08,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 1,
+    "normalized": true,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 1.5954801257933582e-07,
+    "mean_abs_error": 7.566484727661305e-08,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 7,
+    "normalized": false,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 1.4901161193847656e-07,
+    "mean_abs_error": 2.581093992505755e-08,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 7,
+    "normalized": false,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 2.086162567138672e-07,
+    "mean_abs_error": 3.219715186527797e-08,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 7,
+    "normalized": false,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 2.086162567138672e-07,
+    "mean_abs_error": 3.219715186527797e-08,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 7,
+    "normalized": false,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 2.086162567138672e-07,
+    "mean_abs_error": 3.219715186527797e-08,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 7,
+    "normalized": false,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 1.7881393432617188e-07,
+    "mean_abs_error": 3.3261520521981377e-08,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 7,
+    "normalized": false,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 1.043081283569336e-07,
+    "mean_abs_error": 2.6875308581760952e-08,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 7,
+    "normalized": true,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 7.13938028695793e-08,
+    "mean_abs_error": 1.2187102511686452e-08,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 7,
+    "normalized": true,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 7.13938028695793e-08,
+    "mean_abs_error": 1.5380208481796664e-08,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 7,
+    "normalized": true,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 7.13938028695793e-08,
+    "mean_abs_error": 1.5380208481796664e-08,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 7,
+    "normalized": true,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 7.13938028695793e-08,
+    "mean_abs_error": 1.5380208481796664e-08,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 7,
+    "normalized": true,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 8.319324151795371e-08,
+    "mean_abs_error": 2.241532693585719e-08,
+    "passed": true
+  },
+  {
+    "case": "worked_example",
+    "features": 7,
+    "normalized": true,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 7.321492279110942e-08,
+    "mean_abs_error": 2.4295792080567376e-08,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 1,
+    "normalized": false,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 1,
+    "normalized": false,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 1,
+    "normalized": false,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 1,
+    "normalized": false,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 1,
+    "normalized": false,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 1,
+    "normalized": false,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 1,
+    "normalized": true,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 1.5954801257933582e-07,
+    "mean_abs_error": 6.997225412419539e-08,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 1,
+    "normalized": true,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 1.5954801257933582e-07,
+    "mean_abs_error": 6.997225412419539e-08,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 1,
+    "normalized": true,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 1.5954801257933582e-07,
+    "mean_abs_error": 6.997225412419539e-08,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 1,
+    "normalized": true,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 1.5954801257933582e-07,
+    "mean_abs_error": 6.997225412419539e-08,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 1,
+    "normalized": true,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 7.887056652222668e-08,
+    "mean_abs_error": 5.383676491277356e-08,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 1,
+    "normalized": true,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 1.5954801257933582e-07,
+    "mean_abs_error": 6.053187782129043e-08,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 7,
+    "normalized": false,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 2.086162567138672e-07,
+    "mean_abs_error": 3.086669104439872e-08,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 7,
+    "normalized": false,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 2.086162567138672e-07,
+    "mean_abs_error": 2.9589448656354632e-08,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 7,
+    "normalized": false,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 2.086162567138672e-07,
+    "mean_abs_error": 2.9589448656354632e-08,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 7,
+    "normalized": false,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 2.086162567138672e-07,
+    "mean_abs_error": 2.9589448656354632e-08,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 7,
+    "normalized": false,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 2.086162567138672e-07,
+    "mean_abs_error": 2.873795373099191e-08,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 7,
+    "normalized": false,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 2.086162567138672e-07,
+    "mean_abs_error": 3.746577671595982e-08,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 7,
+    "normalized": true,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 7.89260445888118e-08,
+    "mean_abs_error": 1.4561932945677297e-08,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 7,
+    "normalized": true,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 1.4014087090785665e-07,
+    "mean_abs_error": 2.1731089820180097e-08,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 7,
+    "normalized": true,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 1.4014087090785665e-07,
+    "mean_abs_error": 2.1731089820180097e-08,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 7,
+    "normalized": true,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 1.4014087090785665e-07,
+    "mean_abs_error": 2.1731089820180097e-08,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 7,
+    "normalized": true,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 7.89260445888118e-08,
+    "mean_abs_error": 1.441901936946599e-08,
+    "passed": true
+  },
+  {
+    "case": "isolated_node",
+    "features": 7,
+    "normalized": true,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 6.824786902281943e-08,
+    "mean_abs_error": 1.549233636665069e-08,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 1,
+    "normalized": false,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 1,
+    "normalized": false,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 1,
+    "normalized": false,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 1,
+    "normalized": false,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 1,
+    "normalized": false,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 1,
+    "normalized": false,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 1,
+    "normalized": true,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 9.590949545668082e-08,
+    "mean_abs_error": 4.795474772834041e-08,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 1,
+    "normalized": true,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 9.590949545668082e-08,
+    "mean_abs_error": 4.795474772834041e-08,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 1,
+    "normalized": true,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 9.590949545668082e-08,
+    "mean_abs_error": 4.795474772834041e-08,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 1,
+    "normalized": true,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 9.590949545668082e-08,
+    "mean_abs_error": 4.795474772834041e-08,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 1,
+    "normalized": true,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 9.590949545668082e-08,
+    "mean_abs_error": 4.795474772834041e-08,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 1,
+    "normalized": true,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 9.590949545668082e-08,
+    "mean_abs_error": 4.795474772834041e-08,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 7,
+    "normalized": false,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 8.940696716308594e-08,
+    "mean_abs_error": 1.9158635820661274e-08,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 7,
+    "normalized": false,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 8.940696716308594e-08,
+    "mean_abs_error": 1.9158635820661274e-08,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 7,
+    "normalized": false,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 8.940696716308594e-08,
+    "mean_abs_error": 1.9158635820661274e-08,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 7,
+    "normalized": false,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 8.940696716308594e-08,
+    "mean_abs_error": 1.9158635820661274e-08,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 7,
+    "normalized": false,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 8.940696716308594e-08,
+    "mean_abs_error": 1.9158635820661274e-08,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 7,
+    "normalized": false,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 1.7881393432617188e-07,
+    "mean_abs_error": 2.3416110447474888e-08,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 7,
+    "normalized": true,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 1.0994472310343895e-07,
+    "mean_abs_error": 2.1603769913906687e-08,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 7,
+    "normalized": true,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 1.0994472310343895e-07,
+    "mean_abs_error": 2.1603769913906687e-08,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 7,
+    "normalized": true,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 1.0994472310343895e-07,
+    "mean_abs_error": 2.1603769913906687e-08,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 7,
+    "normalized": true,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 1.0994472310343895e-07,
+    "mean_abs_error": 2.1603769913906687e-08,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 7,
+    "normalized": true,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 1.0994472310343895e-07,
+    "mean_abs_error": 2.2119323481997397e-08,
+    "passed": true
+  },
+  {
+    "case": "singleton",
+    "features": 7,
+    "normalized": true,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 1.0994472310343895e-07,
+    "mean_abs_error": 2.174161841636075e-08,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 1,
+    "normalized": false,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 1,
+    "normalized": false,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 1,
+    "normalized": false,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 1,
+    "normalized": false,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 1,
+    "normalized": false,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 1,
+    "normalized": false,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 1,
+    "normalized": true,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 1.299189831271974e-07,
+    "mean_abs_error": 1.0141288042664343e-07,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 1,
+    "normalized": true,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 1.299189831271974e-07,
+    "mean_abs_error": 1.0141288042664343e-07,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 1,
+    "normalized": true,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 1.299189831271974e-07,
+    "mean_abs_error": 1.0141288042664343e-07,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 1,
+    "normalized": true,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 1.299189831271974e-07,
+    "mean_abs_error": 1.0141288042664343e-07,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 1,
+    "normalized": true,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 1.299189831271974e-07,
+    "mean_abs_error": 1.0141288042664343e-07,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 1,
+    "normalized": true,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 1.299189831271974e-07,
+    "mean_abs_error": 8.511456328630373e-08,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 7,
+    "normalized": false,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 1.4901161193847656e-07,
+    "mean_abs_error": 3.17980136190142e-08,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 7,
+    "normalized": false,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 1.4901161193847656e-07,
+    "mean_abs_error": 3.17980136190142e-08,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 7,
+    "normalized": false,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 1.4901161193847656e-07,
+    "mean_abs_error": 3.17980136190142e-08,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 7,
+    "normalized": false,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 1.4901161193847656e-07,
+    "mean_abs_error": 3.17980136190142e-08,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 7,
+    "normalized": false,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 3.5762786865234375e-07,
+    "mean_abs_error": 5.042446511132377e-08,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 7,
+    "normalized": false,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 3.5762786865234375e-07,
+    "mean_abs_error": 4.7763543469565254e-08,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 7,
+    "normalized": true,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 8.656629024716977e-08,
+    "mean_abs_error": 2.8947521704209992e-08,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 7,
+    "normalized": true,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 8.656629024716977e-08,
+    "mean_abs_error": 2.9234400197393088e-08,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 7,
+    "normalized": true,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 8.656629024716977e-08,
+    "mean_abs_error": 2.9234400197393088e-08,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 7,
+    "normalized": true,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 8.656629024716977e-08,
+    "mean_abs_error": 2.9234400197393088e-08,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 7,
+    "normalized": true,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 6.506826821794931e-08,
+    "mean_abs_error": 2.1897267890913707e-08,
+    "passed": true
+  },
+  {
+    "case": "weighted_overlap",
+    "features": 7,
+    "normalized": true,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 7.732062068388501e-08,
+    "mean_abs_error": 2.6084592070520218e-08,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 1,
+    "normalized": false,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 1,
+    "normalized": false,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 1,
+    "normalized": false,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 1,
+    "normalized": false,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 1,
+    "normalized": false,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 1,
+    "normalized": false,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 1,
+    "normalized": true,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 6.409023756148713e-08,
+    "mean_abs_error": 5.180040374419548e-08,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 1,
+    "normalized": true,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 6.409023756148713e-08,
+    "mean_abs_error": 5.180040374419548e-08,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 1,
+    "normalized": true,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 6.409023756148713e-08,
+    "mean_abs_error": 5.180040374419548e-08,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 1,
+    "normalized": true,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 6.409023756148713e-08,
+    "mean_abs_error": 5.180040374419548e-08,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 1,
+    "normalized": true,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 1.9061440426071385e-07,
+    "mean_abs_error": 1.2320551845412808e-07,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 1,
+    "normalized": true,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 1.9061440426071385e-07,
+    "mean_abs_error": 1.2320551845412808e-07,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 7,
+    "normalized": false,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 2.086162567138672e-07,
+    "mean_abs_error": 5.135578768593925e-08,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 7,
+    "normalized": false,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 2.086162567138672e-07,
+    "mean_abs_error": 4.7098313059125626e-08,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 7,
+    "normalized": false,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 2.086162567138672e-07,
+    "mean_abs_error": 4.7098313059125626e-08,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 7,
+    "normalized": false,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 2.086162567138672e-07,
+    "mean_abs_error": 4.7098313059125626e-08,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 7,
+    "normalized": false,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 1.7881393432617188e-07,
+    "mean_abs_error": 4.816268171582903e-08,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 7,
+    "normalized": false,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 1.1920928955078125e-07,
+    "mean_abs_error": 3.751899514879499e-08,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 7,
+    "normalized": true,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 3.918922786283474e-08,
+    "mean_abs_error": 1.4848933535141891e-08,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 7,
+    "normalized": true,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 3.918922786283474e-08,
+    "mean_abs_error": 1.5814131766005753e-08,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 7,
+    "normalized": true,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 3.918922786283474e-08,
+    "mean_abs_error": 1.5814131766005753e-08,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 7,
+    "normalized": true,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 3.918922786283474e-08,
+    "mean_abs_error": 1.5814131766005753e-08,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 7,
+    "normalized": true,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 4.157027492721066e-08,
+    "mean_abs_error": 2.1072186515544037e-08,
+    "passed": true
+  },
+  {
+    "case": "duplicate_membership",
+    "features": 7,
+    "normalized": true,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 7.321492279110942e-08,
+    "mean_abs_error": 2.267610242188372e-08,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 1,
+    "normalized": false,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 1,
+    "normalized": false,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 1,
+    "normalized": false,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 1,
+    "normalized": false,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 1,
+    "normalized": false,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 1,
+    "normalized": false,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 1,
+    "normalized": true,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 1.1920928999487046e-07,
+    "mean_abs_error": 5.960464499743523e-08,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 1,
+    "normalized": true,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 1.1920928999487046e-07,
+    "mean_abs_error": 5.960464499743523e-08,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 1,
+    "normalized": true,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 1.1920928999487046e-07,
+    "mean_abs_error": 5.960464499743523e-08,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 1,
+    "normalized": true,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 1.1920928999487046e-07,
+    "mean_abs_error": 5.960464499743523e-08,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 1,
+    "normalized": true,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 1.1920928999487046e-07,
+    "mean_abs_error": 5.960464499743523e-08,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 1,
+    "normalized": true,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 1.1920928999487046e-07,
+    "mean_abs_error": 5.960464499743523e-08,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 7,
+    "normalized": false,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 4.172325134277344e-07,
+    "mean_abs_error": 7.92954649244036e-08,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 7,
+    "normalized": false,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 4.172325134277344e-07,
+    "mean_abs_error": 7.92954649244036e-08,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 7,
+    "normalized": false,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 4.172325134277344e-07,
+    "mean_abs_error": 7.92954649244036e-08,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 7,
+    "normalized": false,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 4.172325134277344e-07,
+    "mean_abs_error": 7.92954649244036e-08,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 7,
+    "normalized": false,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 4.172325134277344e-07,
+    "mean_abs_error": 1.1441963059561594e-07,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 7,
+    "normalized": false,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 4.172325134277344e-07,
+    "mean_abs_error": 1.1441963059561594e-07,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 7,
+    "normalized": true,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 1.1920928977282585e-07,
+    "mean_abs_error": 2.674226258120503e-08,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 7,
+    "normalized": true,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 1.1920928977282585e-07,
+    "mean_abs_error": 2.674226258120503e-08,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 7,
+    "normalized": true,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 1.1920928977282585e-07,
+    "mean_abs_error": 2.674226258120503e-08,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 7,
+    "normalized": true,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 1.1920928977282585e-07,
+    "mean_abs_error": 2.674226258120503e-08,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 7,
+    "normalized": true,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 1.4901161216052117e-07,
+    "mean_abs_error": 3.525721183483226e-08,
+    "passed": true
+  },
+  {
+    "case": "identical_distinct_edges",
+    "features": 7,
+    "normalized": true,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 1.4901161216052117e-07,
+    "mean_abs_error": 3.525721183483226e-08,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 1,
+    "normalized": false,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 1,
+    "normalized": false,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 1,
+    "normalized": false,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 1,
+    "normalized": false,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 1,
+    "normalized": false,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 1,
+    "normalized": false,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 1,
+    "normalized": true,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 2.384185799897409e-07,
+    "mean_abs_error": 5.960464499743523e-08,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 1,
+    "normalized": true,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 2.384185799897409e-07,
+    "mean_abs_error": 5.960464499743523e-08,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 1,
+    "normalized": true,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 2.384185799897409e-07,
+    "mean_abs_error": 5.960464499743523e-08,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 1,
+    "normalized": true,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 2.384185799897409e-07,
+    "mean_abs_error": 5.960464499743523e-08,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 1,
+    "normalized": true,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 2.384185799897409e-07,
+    "mean_abs_error": 5.960464499743523e-08,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 1,
+    "normalized": true,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 2.384185799897409e-07,
+    "mean_abs_error": 5.960464499743523e-08,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 7,
+    "normalized": false,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 1.1920928955078125e-07,
+    "mean_abs_error": 7.450580596923828e-09,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 7,
+    "normalized": false,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 1.1920928955078125e-07,
+    "mean_abs_error": 7.450580596923828e-09,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 7,
+    "normalized": false,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 1.1920928955078125e-07,
+    "mean_abs_error": 7.450580596923828e-09,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 7,
+    "normalized": false,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 1.1920928955078125e-07,
+    "mean_abs_error": 7.450580596923828e-09,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 7,
+    "normalized": false,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 1.1920928955078125e-07,
+    "mean_abs_error": 7.450580596923828e-09,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 7,
+    "normalized": false,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 1.1920928955078125e-07,
+    "mean_abs_error": 7.450580596923828e-09,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 7,
+    "normalized": true,
+    "method": "dense",
+    "status": "ok",
+    "max_abs_error": 1.4901161138336505e-08,
+    "mean_abs_error": 5.321843927842882e-10,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 7,
+    "normalized": true,
+    "method": "coo",
+    "status": "ok",
+    "max_abs_error": 1.4901161138336505e-08,
+    "mean_abs_error": 5.321843927842882e-10,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 7,
+    "normalized": true,
+    "method": "csr",
+    "status": "ok",
+    "max_abs_error": 1.4901161138336505e-08,
+    "mean_abs_error": 5.321843927842882e-10,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 7,
+    "normalized": true,
+    "method": "membership",
+    "status": "ok",
+    "max_abs_error": 1.4901161138336505e-08,
+    "mean_abs_error": 5.321843927842882e-10,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 7,
+    "normalized": true,
+    "method": "explicit_dense",
+    "status": "ok",
+    "max_abs_error": 2.384185795456517e-07,
+    "mean_abs_error": 2.2351741859169153e-08,
+    "passed": true
+  },
+  {
+    "case": "all_nodes_isolated_except_one",
+    "features": 7,
+    "normalized": true,
+    "method": "explicit_sparse",
+    "status": "ok",
+    "max_abs_error": 2.384185795456517e-07,
+    "mean_abs_error": 2.2351741859169153e-08,
+    "passed": true
+  }
+]

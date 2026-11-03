@@ -1,0 +1,2 @@
+torch>=2.2
+psutil>=5.9

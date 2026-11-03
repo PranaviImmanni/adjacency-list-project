@@ -1,0 +1,39 @@
+{
+  "python": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
+  "torch": "2.14.1+cpu",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "cpu": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+  "cuda_available": false,
+  "cuda_device": null,
+  "arguments": {
+    "test": "test2",
+    "device": "cpu",
+    "output": "results/test2_1000",
+    "threads": 1,
+    "warmup": 10,
+    "repeats": 50,
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "methods": [
+      "dense",
+      "coo",
+      "csr",
+      "membership",
+      "explicit_dense",
+      "explicit_sparse"
+    ],
+    "full": false,
+    "budget_mb": 512,
+    "n": 1000,
+    "m": 1000,
+    "k": 8,
+    "f": 64,
+    "seed": 42,
+    "method": "coo"
+  },
+  "atol": 1e-05,
+  "rtol": 0.0001
+}
