@@ -1,0 +1,23 @@
+{
+  "dataset": "fashion_mnist",
+  "hidden_dims": [300, 100],
+  "val_size": 5000,
+  "split_seed": 0,
+  "model_seeds": [42, 43, 44],
+  "epochs": 30,
+  "train_batch_size": 128,
+  "learning_rate": 0.001,
+  "weight_decay": 0.0,
+  "pruned_layers": ["fc1", "fc2", "fc3"],
+  "methods": ["magnitude", "topk_per_neuron", "random"],
+  "sparsities": [0.5, 0.8, 0.9, 0.95, 0.99],
+  "random_pruning_seeds": [101, 102, 103],
+  "benchmark_random_seeds": [101],
+  "batch_sizes": [1, 32, 256],
+  "eval_batch_size": 256,
+  "dtype": "float32",
+  "tf32": false,
+  "warmup_runs": 20,
+  "measured_runs": 50,
+  "repetitions": 3
+}

@@ -26,10 +26,13 @@ specification of how memory is measured and how equivalence is checked.
   CSR normalized adjacency (see `docs/gcn_inference_plan.md`), plus edge
   pruning (`pruning.py`) and error analysis (`error_analysis.py`, see
   `docs/pruning_and_error_analysis.md`).
+- `src/mlp/` — Fashion-MNIST MLP weight pruning: signed-weight pruning
+  interface, dense / dense+mask / COO / CSR weight storage, harness entry
+  points (see `docs/mlp_weight_pruning_plan.md`).
 - `scripts/` — GCN entry points: train, compare formats, benchmark,
   synthetic sweeps (`run_synthetic_sweep.py`), pruning
-  (`run_pruning_experiments.py`).
-- `configs/` — experiment configs (`gcn_baseline.json`).
+  (`run_pruning_experiments.py`); MLP entry points (`run_mlp_experiments.py`).
+- `configs/` — experiment configs (`gcn_baseline.json`, `mlp_fashion_mnist.json`).
 - `tests/` — round-trip correctness tests and equivalence tests.
 - `docs/` — formalization write-up and `memory_eval_spec.md`.
 - `data/` — downloaded datasets (not committed — see `.gitignore`).
@@ -134,6 +137,23 @@ python scripts/run_pruning_experiments.py --dataset cora --stage verify --device
 python scripts/train_gcn.py --dataset pubmed --device cuda:1 --output checkpoints/pubmed_seed42_gpu.pt
 # ...PubMed format comparison and benchmarks (see the doc), then the same two stages with --dataset pubmed
 python scripts/summarize_pruning_results.py   # writes results/pruning/summary/
+```
+
+### MLP: weight pruning on Fashion-MNIST
+
+One fixed MLP (784-300-100-10) is trained with model seeds 42/43/44. Its
+weights are then pruned by global magnitude, top-K per output neuron, or global random
+(50-99% sparsity, no fine-tuning), and the same pruned weights are run as
+pruned dense, dense+mask, COO and CSR at batch sizes 1, 32 and 256. Design,
+pruning contract and harness interface: `docs/mlp_weight_pruning_plan.md`.
+On the lab GPU:
+
+```bash
+python scripts/run_mlp_experiments.py --stage pilot     --device cuda:1   # seed 42, magnitude 90%: checks the pipeline
+python scripts/run_mlp_experiments.py --stage train     --device cuda:1
+python scripts/run_mlp_experiments.py --stage evaluate  --device cuda:1
+python scripts/run_mlp_experiments.py --stage benchmark --device cuda:1   # ~1,650 runs: use tmux
+python scripts/summarize_mlp_results.py --results-dir results/mlp/cuda1
 ```
 
 ### Existing utilities

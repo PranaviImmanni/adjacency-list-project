@@ -5,3 +5,4 @@ __pycache__/
 .pytest_cache/
 checkpoints/
 results/raw/
+results/mlp/*cpu*/
