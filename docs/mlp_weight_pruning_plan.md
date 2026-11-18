@@ -80,19 +80,29 @@ fc1 / fc2 / fc3): 50% → 50.7 / 45.2 / 25.6%; 90% → 90.4 / 87.3 / 71.0%;
 99% → 99.1 / 98.7 / 90.5%. The small output layer, which has the largest
 weights, keeps the most.
 
-**Which layers are pruned (to confirm with Pranavi).** By default all three
-layers are pruned (`pruned_layers` in the config). Test accuracy (seed 42, CPU,
-no fine-tuning; the unpruned model scores 89.1%):
+**Which layers are pruned: all three (decided).** `fc1`, `fc2` and `fc3` are
+all pruned (`pruned_layers` in the config). Reasons:
+- every weight matrix is then stored in the format being compared, so no
+  "COO" or "CSR" model carries a dense layer, and the storage, memory, latency
+  and equivalence numbers describe the whole network in one format;
+- the same rule applies to every method, with no special case for the output layer;
+- global magnitude already prunes the small output layer less on its own
+  (about 70% at a 90% target);
+- classic LeNet-300-100 pruning also prunes all three layers.
+
+The cost is lower accuracy at high sparsity than with `fc3` kept dense, measured
+before the decision (seed 42, CPU, no fine-tuning; the unpruned model scores 89.1%):
 
 | Pruned | 50% | 80% | 90% | 95% | 99% |
 |---|---|---|---|---|---|
-| global magnitude, fc1 + fc2 + fc3 (default) | 88.5% | 75.0% | 55.4% | 39.2% | 19.0% |
+| global magnitude, fc1 + fc2 + fc3 (used) | 88.5% | 75.0% | 55.4% | 39.2% | 19.0% |
 | global magnitude, fc1 + fc2 (fc3 dense) | 88.4% | 76.4% | 65.5% | 53.8% | 29.4% |
 | per-layer magnitude, all three (not used; for comparison) | 87.1% | 64.1% | 45.1% | 28.1% | 10.3% |
 
-`fc3` has only 1,000 of the 266,200 weights, so keeping it dense barely changes
-the model's overall sparsity. Changing this is one line in the config; layers
-left unpruned are stored dense in every format.
+`fc3` has only 1,000 of the 266,200 weights, so keeping it dense would barely
+change the model's overall sparsity. If that variant is ever wanted, it is one
+line in the config (layers left unpruned are stored dense in every format)
+followed by rerunning `evaluate` and `benchmark`; training is unaffected.
 
 ## 3. Storage formats
 
@@ -231,7 +241,7 @@ CPU runs (`--device cpu`) are for development only. They go to
 
 ## 9. Open decisions
 
-1. **Pruned layers:** all three (default), or keep `fc3` dense (section 2). Agree with Pranavi.
+1. **Pruned layers: decided.** All three layers are pruned (section 2).
 2. **Pruning implementation:** swap in Pranavi's signed-weight heuristics once
    they pass `tests/test_weight_pruning.py`, and rerun `evaluate` and `benchmark`.
 3. **Harness and CSV columns:** Dai's harness can call `load_variant` /
