@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "status": "ok",
+  "experiment": "mlp_benchmark",
+  "timestamp": "2026-11-18T00:55:34.372736+00:00",
+  "dataset": "fashion_mnist",
+  "checkpoint": {
+    "path": "/data/adjli/adjacency-list-project/checkpoints/fashion_mlp_seed43_cuda1.pt",
+    "sha256": "76e8ee9f10532d01",
+    "dataset": "fashion_mnist",
+    "model_seed": 43,
+    "architecture": [
+      784,
+      300,
+      100,
+      10
+    ],
+    "best_epoch": 26,
+    "best_validation_accuracy": 0.8914,
+    "saved_test_accuracy": 0.8915,
+    "train_device": "cuda:1"
+  },
+  "model_seed": 43,
+  "method": "random",
+  "pruning_seed": 101,
+  "requested_sparsity": 0.99,
+  "actual_sparsity": 0.99,
+  "pruned_layers": [
+    "fc1",
+    "fc2",
+    "fc3"
+  ],
+  "pruning": {
+    "method": "random",
+    "scope": "global",
+    "pruning_seed": 101,
+    "requested_sparsity": 0.99,
+    "actual_sparsity": 0.99,
+    "pruned_weights": 266200,
+    "removed_weights": 263538,
+    "layers": {
+      "fc1": {
+        "shape": [
+          300,
+          784
+        ],
+        "numel": 235200,
+        "retained": 2333,
+        "removed": 232867,
+        "actual_sparsity": 0.9900807823129252,
+        "mask_sha256": "95a9e3315dfc9c15"
+      },
+      "fc2": {
+        "shape": [
+          100,
+          300
+        ],
+        "numel": 30000,
+        "retained": 320,
+        "removed": 29680,
+        "actual_sparsity": 0.9893333333333333,
+        "mask_sha256": "d693cef827917990"
+      },
+      "fc3": {
+        "shape": [
+          10,
+          100
+        ],
+        "numel": 1000,
+        "retained": 9,
+        "removed": 991,
+        "actual_sparsity": 0.991,
+        "mask_sha256": "72a499874c1b1b7b"
+      }
+    }
+  },
+  "condition": "pruned",
+  "format": "dense",
+  "batch_size": 256,
+  "repetition": 2,
+  "device": "cuda:1",
+  "device_type": "cuda",
+  "torch_version": "2.14.1+cu130",
+  "cuda_version": "13.0",
+  "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.39",
+  "device_name": "NVIDIA GeForce RTX 3090",
+  "latency_is_debug_only": false,
+  "note": "CUDA run.",
+  "dtype": "float32",
+  "tf32_requested": false,
+  "fp32_precision_applied": "ieee",
+  "storage": {
+    "format": "dense",
+    "weight_bytes": 1064800,
+    "bias_bytes": 1640,
+    "layers": {
+      "fc1": {
+        "format": "dense",
+        "pruned": true,
+        "shape": [
+          300,
+          784
+        ],
+        "stored_values": 235200,
+        "weight_bytes": 940800,
+        "weight_bytes_breakdown": {
+          "values": 940800
+        },
+        "value_dtype": "torch.float32",
+        "index_dtype": null,
+        "mask_dtype": null,
+        "bias_bytes": 1200
+      },
+      "fc2": {
+        "format": "dense",
+        "pruned": true,
+        "shape": [
+          100,
+          300
+        ],
+        "stored_values": 30000,
+        "weight_bytes": 120000,
+        "weight_bytes_breakdown": {
+          "values": 120000
+        },
+        "value_dtype": "torch.float32",
+        "index_dtype": null,
+        "mask_dtype": null,
+        "bias_bytes": 400
+      },
+      "fc3": {
+        "format": "dense",
+        "pruned": true,
+        "shape": [
+          10,
+          100
+        ],
+        "stored_values": 1000,
+        "weight_bytes": 4000,
+        "weight_bytes_breakdown": {
+          "values": 4000
+        },
+        "value_dtype": "torch.float32",
+        "index_dtype": null,
+        "mask_dtype": null,
+        "bias_bytes": 40
+      }
+    }
+  },
+  "weight_storage_bytes": 1064800,
+  "bias_bytes": 1640,
+  "resident_tensor_bytes": 1869256,
+  "timing_ms": {
+    "pruning_ms": 7.004868937656283,
+    "format_build_ms": 0.39289798587560654,
+    "transfer_ms": 135.4853888042271
+  },
+  "warmup_runs": 20,
+  "measured_runs": 50,
+  "latency_ms": {
+    "mean": 0.13440420851111412,
+    "median": 0.1325609628111124,
+    "std": 0.004623226605439706,
+    "min": 0.13041612692177296,
+    "max": 0.14940486289560795
+  },
+  "latency_samples_ms": [
+    0.14085602015256882,
+    0.13937614858150482,
+    0.14940486289560795,
+    0.13404595665633678,
+    0.13440591283142567,
+    0.13440614566206932,
+    0.13323500752449036,
+    0.13248599134385586,
+    0.1339660957455635,
+    0.14494499191641808,
+    0.13397610746324062,
+    0.13263593427836895,
+    0.13322592712938786,
+    0.1319260336458683,
+    0.13227504678070545,
+    0.13285595923662186,
+    0.14439597725868225,
+    0.1346450299024582,
+    0.13285595923662186,
+    0.13195606879889965,
+    0.13232603669166565,
+    0.13342616148293018,
+    0.13289600610733032,
+    0.13315491378307343,
+    0.14527584426105022,
+    0.13188598677515984,
+    0.13185502029955387,
+    0.13190601021051407,
+    0.13248599134385586,
+    0.13168598525226116,
+    0.1314859837293625,
+    0.1405850052833557,
+    0.13323617167770863,
+    0.13142614625394344,
+    0.13191602192819118,
+    0.13099610805511475,
+    0.13082590885460377,
+    0.13067503459751606,
+    0.1314259134232998,
+    0.14487607404589653,
+    0.1344860065728426,
+    0.13174605555832386,
+    0.13041612692177296,
+    0.13122614473104477,
+    0.1314359251409769,
+    0.13134581968188286,
+    0.14225486665964127,
+    0.13197609223425388,
+    0.13086595572531223,
+    0.1322359312325716
+  ],
+  "peak_reset": "after warm-up, before the measured passes",
+  "cuda_allocated_before_inference_bytes": 1870848,
+  "cuda_peak_allocated_bytes": 11015168,
+  "cuda_peak_reserved_bytes": 25165824,
+  "energy_joules": null,
+  "format_check": null,
+  "logits_sha256": "ed362bba79c4dcea"
+}

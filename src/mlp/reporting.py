@@ -9,6 +9,7 @@ Aggregation:
   latency    per unit: median of the per-repetition medians; then the mean
              over units, whiskers = min-max over units
   peak       per unit: max over repetitions; then mean, min-max over units
+             (likewise resident-before-inference and peak - resident)
   storage    exact bytes (identical across seeds for a given method and level)
   epsilon    worst case over units (max epsilon, min agreement, ...)
 
@@ -147,16 +148,24 @@ def benchmark_points(benchmarks):
     for r in benchmarks:
         units[(r["method"], r["requested_sparsity"], r["format"], r["batch_size"],
                r["model_seed"], r["pruning_seed"])].append(r)
-    groups = defaultdict(lambda: {"latency": [], "peak": [], "reps": [], "debug": False, "checks": []})
+    groups = defaultdict(lambda: {"latency": [], "peak": [], "resident": [], "extra": [], "reps": [],
+                                  "debug": False, "checks": []})
     for (method, sparsity, storage_format, batch, *_), reps in units.items():
         g = groups[(method, sparsity, storage_format, batch)]
         g["latency"].append(statistics.median(r["latency_ms"]["median"] for r in reps))
-        peaks = [r["cuda_peak_allocated_bytes"] for r in reps if r["cuda_peak_allocated_bytes"] is not None]
-        g["peak"].append(max(peaks) if peaks else None)
+        for key, field in (("peak", "cuda_peak_allocated_bytes"),
+                           ("resident", "cuda_allocated_before_inference_bytes")):
+            values = [r[field] for r in reps if r.get(field) is not None]
+            g[key].append(max(values) if values else None)
+        extra = [r["cuda_peak_allocated_bytes"] - r["cuda_allocated_before_inference_bytes"] for r in reps
+                 if r.get("cuda_peak_allocated_bytes") is not None
+                 and r.get("cuda_allocated_before_inference_bytes") is not None]
+        g["extra"].append(max(extra) if extra else None)
         g["reps"].append(len(reps))
         g["debug"] |= any(r["latency_is_debug_only"] for r in reps)
         g["checks"] += [r["format_check"] for r in reps if r.get("format_check")]
-    return {key: {"latency": _stats(g["latency"]), "peak": _stats(g["peak"]), "units": len(g["latency"]),
+    return {key: {"latency": _stats(g["latency"]), "peak": _stats(g["peak"]), "resident": _stats(g["resident"]),
+                  "peak_minus_resident": _stats(g["extra"]), "units": len(g["latency"]),
                   "min_reps": min(g["reps"]), "debug": g["debug"], "checks": g["checks"]}
             for key, g in groups.items()}
 
@@ -175,6 +184,16 @@ def _range(stats, fmt):
     if stats["n"] == 1 or stats["min"] == stats["max"]:
         return fmt(stats["mean"])
     return f"{fmt(stats['mean'])} ({fmt(stats['min'])} - {fmt(stats['max'])})"
+
+
+def _memory_row(method_label, sparsity_label, format_label, batch, point):
+    """Resident, peak and their difference, each mean (min - max) over units."""
+    resident, peak = point["resident"], point["peak"]
+    if resident is None:
+        return [method_label, sparsity_label, format_label, batch, "n/a", _range(peak, _compact_bytes), "n/a"]
+    extra = point.get("peak_minus_resident")
+    return [method_label, sparsity_label, format_label, batch, _range(resident, _compact_bytes),
+            _range(peak, _compact_bytes), _range(extra, _compact_bytes) if extra else "n/a"]
 
 
 def _sparsity_label(s):
@@ -462,8 +481,8 @@ def summarize_mlp(results_dir, out_dir):
                         if p["peak"]:
                             peak = p["peak"]
                             peak_series[storage_format].append((s, peak["mean"], peak["min"], peak["max"]))
-                            peak_rows.append([METHOD_STYLE[method]["label"], _sparsity_label(s),
-                                              FORMAT_LABELS[storage_format], batch, _range(peak, _compact_bytes)])
+                            peak_rows.append(_memory_row(METHOD_STYLE[method]["label"], _sparsity_label(s),
+                                                         FORMAT_LABELS[storage_format], batch, p))
                 panels.append((f"batch size {batch}", dict(series), ref["latency"]["mean"] if ref else None))
                 peak_panels.append((f"batch size {batch}", dict(peak_series),
                                     ref["peak"]["mean"] if ref and ref["peak"] else None))
@@ -474,8 +493,9 @@ def summarize_mlp(results_dir, out_dir):
             if any(series for _, series, _ in peak_panels):
                 chart(f"peak_memory_vs_sparsity_{method}.png", peak_panels, FORMAT_STYLE,
                       f"Total peak GPU memory vs sparsity and batch size ({label} pruning)",
-                      "torch.cuda.max_memory_allocated during the timed passes: weights, biases, input and "
-                      "activations. Mean over units, whiskers min - max.", _compact_bytes)
+                      "torch.cuda.max_memory_allocated during the timed passes: weights, biases, input, "
+                      "activations and library workspace (the dense formats include cuBLAS's fixed 8.1 MiB "
+                      "workspace). Mean over units, whiskers min - max.", _compact_bytes)
         original_rows = [["original", "0%", "dense", batch, _range(bench[("none", 0.0, "dense", batch)]["latency"],
                                                                   lambda v: f"{v:.4f}"),
                           bench[("none", 0.0, "dense", batch)]["units"], bench[("none", 0.0, "dense", batch)]["min_reps"]]
@@ -484,8 +504,22 @@ def summarize_mlp(results_dir, out_dir):
                 original_rows + lat_rows, device_note + " Charts: latency_vs_sparsity_<method>.png.",
                 csv_name="latency.csv")
         if peak_rows:
-            section("Total peak GPU memory", ["Method", "Sparsity", "Format", "Batch", "Peak allocated"], peak_rows,
-                    "Charts: peak_memory_vs_sparsity_<method>.png.", csv_name="peak_memory.csv")
+            original_peak = [_memory_row("original", "0%", "dense", batch, bench[("none", 0.0, "dense", batch)])
+                             for batch in batches
+                             if ("none", 0.0, "dense", batch) in bench and bench[("none", 0.0, "dense", batch)]["peak"]]
+            section("Total peak GPU memory",
+                    ["Method", "Sparsity", "Format", "Batch", "Resident before inference", "Peak allocated",
+                     "Peak - resident"], original_peak + peak_rows,
+                    "Resident = torch.cuda.memory_allocated after loading, before the first pass: the stored "
+                    "weights, biases and input batch. Peak = torch.cuda.max_memory_allocated over the timed "
+                    "passes (reset after warm-up). Peak - resident = activations, temporaries and library "
+                    "workspace. For pruned dense and original dense it includes cuBLAS's workspace, which "
+                    "PyTorch allocates through its caching allocator on the first dense matmul and keeps "
+                    "(8,519,680 B = 2 x 4 MiB + 8 x 16 KiB by default, the same in every run). Dense+mask "
+                    "adds the W*mask temporary on top of that. The sparse formats run on cuSPARSE and do not "
+                    "use that workspace, so compare formats on both columns; the weights alone are in the "
+                    "weight storage table. Charts: peak_memory_vs_sparsity_<method>.png.",
+                    csv_name="peak_memory.csv")
         else:
             md.extend(["## Total peak GPU memory", "", "Not available: these runs are not on CUDA.", ""])
 

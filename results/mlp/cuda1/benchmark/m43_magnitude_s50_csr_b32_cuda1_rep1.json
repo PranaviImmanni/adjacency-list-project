@@ -1,0 +1,268 @@
+{
+  "schema_version": 1,
+  "status": "ok",
+  "experiment": "mlp_benchmark",
+  "timestamp": "2026-11-18T00:07:01.039349+00:00",
+  "dataset": "fashion_mnist",
+  "checkpoint": {
+    "path": "/data/adjli/adjacency-list-project/checkpoints/fashion_mlp_seed43_cuda1.pt",
+    "sha256": "76e8ee9f10532d01",
+    "dataset": "fashion_mnist",
+    "model_seed": 43,
+    "architecture": [
+      784,
+      300,
+      100,
+      10
+    ],
+    "best_epoch": 26,
+    "best_validation_accuracy": 0.8914,
+    "saved_test_accuracy": 0.8915,
+    "train_device": "cuda:1"
+  },
+  "model_seed": 43,
+  "method": "magnitude",
+  "pruning_seed": null,
+  "requested_sparsity": 0.5,
+  "actual_sparsity": 0.5,
+  "pruned_layers": [
+    "fc1",
+    "fc2",
+    "fc3"
+  ],
+  "pruning": {
+    "method": "magnitude",
+    "scope": "global",
+    "pruning_seed": null,
+    "requested_sparsity": 0.5,
+    "actual_sparsity": 0.5,
+    "pruned_weights": 266200,
+    "removed_weights": 133100,
+    "layers": {
+      "fc1": {
+        "shape": [
+          300,
+          784
+        ],
+        "numel": 235200,
+        "retained": 115679,
+        "removed": 119521,
+        "actual_sparsity": 0.5081675170068027,
+        "mask_sha256": "432df47c53ae059c"
+      },
+      "fc2": {
+        "shape": [
+          100,
+          300
+        ],
+        "numel": 30000,
+        "retained": 16691,
+        "removed": 13309,
+        "actual_sparsity": 0.4436333333333333,
+        "mask_sha256": "13f18eb119325f72"
+      },
+      "fc3": {
+        "shape": [
+          10,
+          100
+        ],
+        "numel": 1000,
+        "retained": 730,
+        "removed": 270,
+        "actual_sparsity": 0.27,
+        "mask_sha256": "3794f18f74533961"
+      }
+    }
+  },
+  "condition": "pruned",
+  "format": "csr",
+  "batch_size": 32,
+  "repetition": 1,
+  "device": "cuda:1",
+  "device_type": "cuda",
+  "torch_version": "2.14.1+cu130",
+  "cuda_version": "13.0",
+  "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.39",
+  "device_name": "NVIDIA GeForce RTX 3090",
+  "latency_is_debug_only": false,
+  "note": "CUDA run.",
+  "dtype": "float32",
+  "tf32_requested": false,
+  "fp32_precision_applied": "ieee",
+  "storage": {
+    "format": "csr",
+    "weight_bytes": 1600504,
+    "bias_bytes": 1640,
+    "layers": {
+      "fc1": {
+        "format": "csr",
+        "pruned": true,
+        "shape": [
+          300,
+          784
+        ],
+        "stored_values": 115679,
+        "weight_bytes": 1390556,
+        "weight_bytes_breakdown": {
+          "values": 462716,
+          "col_indices": 925432,
+          "crow_indices": 2408
+        },
+        "value_dtype": "torch.float32",
+        "index_dtype": "torch.int64",
+        "mask_dtype": null,
+        "bias_bytes": 1200
+      },
+      "fc2": {
+        "format": "csr",
+        "pruned": true,
+        "shape": [
+          100,
+          300
+        ],
+        "stored_values": 16691,
+        "weight_bytes": 201100,
+        "weight_bytes_breakdown": {
+          "values": 66764,
+          "col_indices": 133528,
+          "crow_indices": 808
+        },
+        "value_dtype": "torch.float32",
+        "index_dtype": "torch.int64",
+        "mask_dtype": null,
+        "bias_bytes": 400
+      },
+      "fc3": {
+        "format": "csr",
+        "pruned": true,
+        "shape": [
+          10,
+          100
+        ],
+        "stored_values": 730,
+        "weight_bytes": 8848,
+        "weight_bytes_breakdown": {
+          "values": 2920,
+          "col_indices": 5840,
+          "crow_indices": 88
+        },
+        "value_dtype": "torch.float32",
+        "index_dtype": "torch.int64",
+        "mask_dtype": null,
+        "bias_bytes": 40
+      }
+    }
+  },
+  "weight_storage_bytes": 1600504,
+  "bias_bytes": 1640,
+  "resident_tensor_bytes": 1702496,
+  "timing_ms": {
+    "pruning_ms": 46.19258805178106,
+    "format_build_ms": 13.011361006647348,
+    "transfer_ms": 141.15881104953587
+  },
+  "warmup_runs": 20,
+  "measured_runs": 50,
+  "latency_ms": {
+    "mean": 0.27421615552157164,
+    "median": 0.27227646205574274,
+    "std": 0.006632894381755941,
+    "min": 0.26612216606736183,
+    "max": 0.30055083334445953
+  },
+  "latency_samples_ms": [
+    0.27450080960989,
+    0.275470782071352,
+    0.30055083334445953,
+    0.27254107408225536,
+    0.2741620410233736,
+    0.28182100504636765,
+    0.2761308569461107,
+    0.2689820248633623,
+    0.27246098034083843,
+    0.28599100187420845,
+    0.273620942607522,
+    0.26793195866048336,
+    0.27036084793508053,
+    0.28252205811440945,
+    0.27311104349792004,
+    0.26802183128893375,
+    0.28379191644489765,
+    0.26840087957680225,
+    0.2715419977903366,
+    0.2686211373656988,
+    0.2855909988284111,
+    0.2696220763027668,
+    0.27072103694081306,
+    0.2760209608823061,
+    0.27524190954864025,
+    0.2677510492503643,
+    0.27209194377064705,
+    0.27905101887881756,
+    0.2708509564399719,
+    0.26612216606736183,
+    0.2714109141379595,
+    0.2809020224958658,
+    0.26910100132226944,
+    0.26925187557935715,
+    0.2832708414644003,
+    0.2711010165512562,
+    0.2716819290071726,
+    0.26784115470945835,
+    0.2834408078342676,
+    0.2672220580279827,
+    0.27271080762147903,
+    0.2689119428396225,
+    0.2812009770423174,
+    0.26874104514718056,
+    0.27097202837467194,
+    0.27648103423416615,
+    0.2733620349317789,
+    0.2680311445146799,
+    0.27123186737298965,
+    0.28034113347530365
+  ],
+  "peak_reset": "after warm-up, before the measured passes",
+  "cuda_allocated_before_inference_bytes": 1705472,
+  "cuda_peak_allocated_bytes": 1822720,
+  "cuda_peak_reserved_bytes": 2097152,
+  "energy_joules": null,
+  "format_check": {
+    "test_accuracy": 0.875,
+    "reference_test_accuracy": 0.875,
+    "accuracy_difference_pp": 0.0,
+    "prediction_agreement_test": 1.0,
+    "prediction_agreement_all": 1.0,
+    "mean_abs_logit_diff": 1.095794141292572e-06,
+    "max_abs_logit_diff": 7.62939453125e-06,
+    "allclose": true,
+    "atol": 1e-05,
+    "rtol": 0.0001,
+    "epsilon_logit": 7.62939453125e-06,
+    "abs_accuracy_difference_pp": 0.0,
+    "margin": {
+      "all": {
+        "nodes": 32,
+        "margin_condition_fraction": 1.0,
+        "disagreement_rate": 0.0,
+        "disagreements": 0,
+        "disagreements_satisfying_condition": 0,
+        "median_margin": 8.755757808685303,
+        "max_node_epsilon": 7.62939453125e-06
+      },
+      "test": {
+        "nodes": 32,
+        "margin_condition_fraction": 1.0,
+        "disagreement_rate": 0.0,
+        "disagreements": 0,
+        "disagreements_satisfying_condition": 0,
+        "median_margin": 8.755757808685303,
+        "max_node_epsilon": 7.62939453125e-06
+      }
+    },
+    "equivalent": true,
+    "bitwise_equal": false,
+    "reference": "pruned dense on cuda:1, same batch"
+  },
+  "logits_sha256": "62ae9d5cc8164053"
+}

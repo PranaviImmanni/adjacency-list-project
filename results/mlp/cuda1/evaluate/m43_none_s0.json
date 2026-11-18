@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "experiment": "mlp_evaluate",
+  "status": "ok",
+  "checkpoint": {
+    "path": "/data/adjli/adjacency-list-project/checkpoints/fashion_mlp_seed43_cuda1.pt",
+    "sha256": "76e8ee9f10532d01",
+    "dataset": "fashion_mnist",
+    "model_seed": 43,
+    "architecture": [
+      784,
+      300,
+      100,
+      10
+    ],
+    "best_epoch": 26,
+    "best_validation_accuracy": 0.8914,
+    "saved_test_accuracy": 0.8915,
+    "train_device": "cuda:1"
+  },
+  "model_seed": 43,
+  "device": "cuda:1",
+  "device_type": "cuda",
+  "torch_version": "2.14.1+cu130",
+  "cuda_version": "13.0",
+  "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.39",
+  "device_name": "NVIDIA GeForce RTX 3090",
+  "tf32_requested": false,
+  "fp32_precision_applied": "ieee",
+  "dtype": "float32",
+  "eval_batch_size": 256,
+  "eval_set": {
+    "val": 5000,
+    "test": 10000
+  },
+  "timestamp": "2026-11-17T23:14:48.501883+00:00",
+  "method": "none",
+  "requested_sparsity": 0.0,
+  "pruning_seed": null,
+  "actual_sparsity": 0.0,
+  "accuracy": {
+    "val": 0.8914,
+    "test": 0.8915
+  },
+  "storage": {
+    "dense": {
+      "format": "dense",
+      "weight_bytes": 1064800,
+      "bias_bytes": 1640,
+      "layers": {
+        "fc1": {
+          "format": "dense",
+          "pruned": false,
+          "shape": [
+            300,
+            784
+          ],
+          "stored_values": 235200,
+          "weight_bytes": 940800,
+          "weight_bytes_breakdown": {
+            "values": 940800
+          },
+          "value_dtype": "torch.float32",
+          "index_dtype": null,
+          "mask_dtype": null,
+          "bias_bytes": 1200
+        },
+        "fc2": {
+          "format": "dense",
+          "pruned": false,
+          "shape": [
+            100,
+            300
+          ],
+          "stored_values": 30000,
+          "weight_bytes": 120000,
+          "weight_bytes_breakdown": {
+            "values": 120000
+          },
+          "value_dtype": "torch.float32",
+          "index_dtype": null,
+          "mask_dtype": null,
+          "bias_bytes": 400
+        },
+        "fc3": {
+          "format": "dense",
+          "pruned": false,
+          "shape": [
+            10,
+            100
+          ],
+          "stored_values": 1000,
+          "weight_bytes": 4000,
+          "weight_bytes_breakdown": {
+            "values": 4000
+          },
+          "value_dtype": "torch.float32",
+          "index_dtype": null,
+          "mask_dtype": null,
+          "bias_bytes": 40
+        }
+      }
+    }
+  },
+  "logits_sha256": "3a4f0287807a037d",
+  "accuracy_matches_checkpoint": true
+}

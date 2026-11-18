@@ -1,0 +1,184 @@
+Method,Sparsity,Format,Batch,Resident before inference,Peak allocated,Peak - resident
+original,0%,dense,1,1.1 MB,9.6 MB,8.5 MB
+original,0%,dense,32,1.2 MB,9.8 MB,8.6 MB
+original,0%,dense,256,1.9 MB,11 MB,9.1 MB
+magnitude,50%,pruned dense,1,1.1 MB,9.6 MB,8.5 MB
+magnitude,50%,dense+mask,1,1.3 MB,10.9 MB,9.6 MB
+magnitude,50%,COO,1,2.7 MB (2.7 MB - 2.7 MB),3.1 MB (3.1 MB - 3.1 MB),469.7 KB (468 KB - 471 KB)
+magnitude,50%,CSR,1,1.6 MB,1.6 MB,4.6 KB
+magnitude,80%,pruned dense,1,1.1 MB,9.6 MB,8.5 MB
+magnitude,80%,dense+mask,1,1.3 MB,10.9 MB,9.6 MB
+magnitude,80%,COO,1,1.1 MB (1.1 MB - 1.1 MB),1.3 MB (1.3 MB - 1.3 MB),188.9 KB (187.9 KB - 189.4 KB)
+magnitude,80%,CSR,1,650.9 KB (650.2 KB - 651.3 KB),655 KB (654.3 KB - 655.4 KB),4.1 KB
+magnitude,90%,pruned dense,1,1.1 MB,9.6 MB,8.5 MB
+magnitude,90%,dense+mask,1,1.3 MB,10.9 MB,9.6 MB
+magnitude,90%,COO,1,540 KB (539.1 KB - 540.7 KB),636.9 KB (635.9 KB - 637.4 KB),96.9 KB (96.8 KB - 97.3 KB)
+magnitude,90%,CSR,1,331.4 KB (330.8 KB - 331.8 KB),335.5 KB (334.8 KB - 335.9 KB),4.1 KB
+magnitude,95%,pruned dense,1,1.1 MB,9.6 MB,8.5 MB
+magnitude,95%,dense+mask,1,1.3 MB,10.9 MB,9.6 MB
+magnitude,95%,COO,1,273.7 KB (273.4 KB - 274.4 KB),325.3 KB (324.6 KB - 326.1 KB),51.5 KB (51.2 KB - 51.7 KB)
+magnitude,95%,CSR,1,171.3 KB (171 KB - 172 KB),175.4 KB (175.1 KB - 176.1 KB),4.1 KB
+magnitude,99%,pruned dense,1,1.1 MB,9.6 MB,8.5 MB
+magnitude,99%,dense+mask,1,1.3 MB,10.9 MB,9.6 MB
+magnitude,99%,COO,1,60.8 KB (60.4 KB - 60.9 KB),76.8 KB,16 KB (15.9 KB - 16.4 KB)
+magnitude,99%,CSR,1,43.5 KB,47.6 KB,4.1 KB
+magnitude,50%,pruned dense,32,1.2 MB,9.8 MB,8.6 MB
+magnitude,50%,dense+mask,32,1.4 MB,11.1 MB,9.6 MB
+magnitude,50%,COO,32,2.8 MB (2.8 MB - 2.8 MB),3.3 MB (3.3 MB - 3.4 MB),582.8 KB (581.1 KB - 584.2 KB)
+magnitude,50%,CSR,32,1.7 MB,1.8 MB (1.8 MB - 1.8 MB),117.1 KB (116.7 KB - 117.2 KB)
+magnitude,80%,pruned dense,32,1.2 MB,9.8 MB,8.6 MB
+magnitude,80%,dense+mask,32,1.4 MB,11.1 MB,9.6 MB
+magnitude,80%,COO,32,1.2 MB (1.2 MB - 1.2 MB),1.5 MB (1.5 MB - 1.5 MB),301.1 KB (300 KB - 301.6 KB)
+magnitude,80%,CSR,32,747.7 KB (747 KB - 748 KB),841.4 KB (840.7 KB - 841.7 KB),93.7 KB
+magnitude,90%,pruned dense,32,1.2 MB,9.8 MB,8.6 MB
+magnitude,90%,dense+mask,32,1.4 MB,11.1 MB,9.6 MB
+magnitude,90%,COO,32,636.8 KB (635.9 KB - 637.4 KB),845.3 KB (844.3 KB - 845.8 KB),208.6 KB (208.4 KB - 208.9 KB)
+magnitude,90%,CSR,32,428.2 KB (427.5 KB - 428.5 KB),514.2 KB (513.5 KB - 514.6 KB),86 KB
+magnitude,95%,pruned dense,32,1.2 MB,9.8 MB,8.6 MB
+magnitude,95%,dense+mask,32,1.4 MB,11.1 MB,9.6 MB
+magnitude,95%,COO,32,370.5 KB (370.2 KB - 371.2 KB),533.7 KB (533 KB - 534.5 KB),163.2 KB (162.8 KB - 163.3 KB)
+magnitude,95%,CSR,32,268.1 KB (267.8 KB - 268.8 KB),350.5 KB (350.2 KB - 351.2 KB),82.4 KB
+magnitude,99%,pruned dense,32,1.2 MB,9.8 MB,8.6 MB
+magnitude,99%,dense+mask,32,1.4 MB,11.1 MB,9.6 MB
+magnitude,99%,COO,32,157.5 KB (157.2 KB - 157.7 KB),285.2 KB,127.7 KB (127.5 KB - 128 KB)
+magnitude,99%,CSR,32,140.3 KB,219.6 KB,79.4 KB
+magnitude,50%,pruned dense,256,1.9 MB,11 MB,9.1 MB
+magnitude,50%,dense+mask,256,2.1 MB,12.2 MB,10.1 MB
+magnitude,50%,COO,256,3.5 MB (3.5 MB - 3.5 MB),4.9 MB (4.9 MB - 4.9 MB),1.4 MB (1.4 MB - 1.4 MB)
+magnitude,50%,CSR,256,2.4 MB,3.1 MB (3.1 MB - 3.1 MB),663.4 KB (663 KB - 663.6 KB)
+magnitude,80%,pruned dense,256,1.9 MB,11 MB,9.1 MB
+magnitude,80%,dense+mask,256,2.1 MB,12.2 MB,10.1 MB
+magnitude,80%,COO,256,1.9 MB (1.9 MB - 1.9 MB),3 MB (3 MB - 3 MB),1.1 MB (1.1 MB - 1.1 MB)
+magnitude,80%,CSR,256,1.5 MB (1.4 MB - 1.5 MB),2.1 MB (2.1 MB - 2.1 MB),640 KB
+magnitude,90%,pruned dense,256,1.9 MB,11 MB,9.1 MB
+magnitude,90%,dense+mask,256,2.1 MB,12.2 MB,10.1 MB
+magnitude,90%,COO,256,1.3 MB (1.3 MB - 1.3 MB),2.4 MB (2.4 MB - 2.4 MB),1 MB (1 MB - 1 MB)
+magnitude,90%,CSR,256,1.1 MB (1.1 MB - 1.1 MB),1.8 MB (1.8 MB - 1.8 MB),632.3 KB
+magnitude,95%,pruned dense,256,1.9 MB,11 MB,9.1 MB
+magnitude,95%,dense+mask,256,2.1 MB,12.2 MB,10.1 MB
+magnitude,95%,COO,256,1.1 MB (1.1 MB - 1.1 MB),2.1 MB (2.1 MB - 2.1 MB),978.3 KB (977.9 KB - 978.4 KB)
+magnitude,95%,CSR,256,970.6 KB (970.2 KB - 971.3 KB),1.6 MB (1.6 MB - 1.6 MB),628.7 KB
+magnitude,99%,pruned dense,256,1.9 MB,11 MB,9.1 MB
+magnitude,99%,dense+mask,256,2.1 MB,12.2 MB,10.1 MB
+magnitude,99%,COO,256,860 KB (859.6 KB - 860.2 KB),1.8 MB,942.8 KB (942.6 KB - 943.1 KB)
+magnitude,99%,CSR,256,842.8 KB,1.5 MB,625.7 KB
+top-K per neuron,50%,pruned dense,1,1.1 MB,9.6 MB,8.5 MB
+top-K per neuron,50%,dense+mask,1,1.3 MB,10.9 MB,9.6 MB
+top-K per neuron,50%,COO,1,2.7 MB,3.1 MB,477.7 KB
+top-K per neuron,50%,CSR,1,1.6 MB,1.6 MB,4.6 KB
+top-K per neuron,80%,pruned dense,1,1.1 MB,9.6 MB,8.5 MB
+top-K per neuron,80%,dense+mask,1,1.3 MB,10.9 MB,9.6 MB
+top-K per neuron,80%,COO,1,1.1 MB,1.3 MB,195.6 KB
+top-K per neuron,80%,CSR,1,650.8 KB,654.8 KB,4.1 KB
+top-K per neuron,90%,pruned dense,1,1.1 MB,9.6 MB,8.5 MB
+top-K per neuron,90%,dense+mask,1,1.3 MB,10.9 MB,9.6 MB
+top-K per neuron,90%,COO,1,543.7 KB,646.1 KB,102.4 KB
+top-K per neuron,90%,CSR,1,333.3 KB,337.4 KB,4.1 KB
+top-K per neuron,95%,pruned dense,1,1.1 MB,9.6 MB,8.5 MB
+top-K per neuron,95%,dense+mask,1,1.3 MB,10.9 MB,9.6 MB
+top-K per neuron,95%,COO,1,278 KB,333.3 KB,55.3 KB
+top-K per neuron,95%,CSR,1,174.1 KB,178.2 KB,4.1 KB
+top-K per neuron,99%,pruned dense,1,1.1 MB,9.6 MB,8.5 MB
+top-K per neuron,99%,dense+mask,1,1.3 MB,10.9 MB,9.6 MB
+top-K per neuron,99%,COO,1,62 KB,78.8 KB,16.9 KB
+top-K per neuron,99%,CSR,1,44.5 KB,48.6 KB,4.1 KB
+top-K per neuron,50%,pruned dense,32,1.2 MB,9.8 MB,8.6 MB
+top-K per neuron,50%,dense+mask,32,1.4 MB,11.1 MB,9.6 MB
+top-K per neuron,50%,COO,32,2.8 MB,3.4 MB,590.8 KB
+top-K per neuron,50%,CSR,32,1.7 MB,1.8 MB,117.8 KB
+top-K per neuron,80%,pruned dense,32,1.2 MB,9.8 MB,8.6 MB
+top-K per neuron,80%,dense+mask,32,1.4 MB,11.1 MB,9.6 MB
+top-K per neuron,80%,COO,32,1.2 MB,1.5 MB,307.7 KB
+top-K per neuron,80%,CSR,32,747.5 KB,841.7 KB,94.2 KB
+top-K per neuron,90%,pruned dense,32,1.2 MB,9.8 MB,8.6 MB
+top-K per neuron,90%,dense+mask,32,1.4 MB,11.1 MB,9.6 MB
+top-K per neuron,90%,COO,32,640.5 KB,854.5 KB,214 KB
+top-K per neuron,90%,CSR,32,430.1 KB,516.6 KB,86.5 KB
+top-K per neuron,95%,pruned dense,32,1.2 MB,9.8 MB,8.6 MB
+top-K per neuron,95%,dense+mask,32,1.4 MB,11.1 MB,9.6 MB
+top-K per neuron,95%,COO,32,374.8 KB,541.7 KB,166.9 KB
+top-K per neuron,95%,CSR,32,270.8 KB,353.3 KB,82.4 KB
+top-K per neuron,99%,pruned dense,32,1.2 MB,9.8 MB,8.6 MB
+top-K per neuron,99%,dense+mask,32,1.4 MB,11.1 MB,9.6 MB
+top-K per neuron,99%,COO,32,158.7 KB,287.2 KB,128.5 KB
+top-K per neuron,99%,CSR,32,141.3 KB,220.7 KB,79.4 KB
+top-K per neuron,50%,pruned dense,256,1.9 MB,11 MB,9.1 MB
+top-K per neuron,50%,dense+mask,256,2.1 MB,12.2 MB,10.1 MB
+top-K per neuron,50%,COO,256,3.5 MB,4.9 MB,1.4 MB
+top-K per neuron,50%,CSR,256,2.4 MB,3.1 MB,664.1 KB
+top-K per neuron,80%,pruned dense,256,1.9 MB,11 MB,9.1 MB
+top-K per neuron,80%,dense+mask,256,2.1 MB,12.2 MB,10.1 MB
+top-K per neuron,80%,COO,256,1.9 MB,3 MB,1.1 MB
+top-K per neuron,80%,CSR,256,1.4 MB,2.1 MB,640.5 KB
+top-K per neuron,90%,pruned dense,256,1.9 MB,11 MB,9.1 MB
+top-K per neuron,90%,dense+mask,256,2.1 MB,12.2 MB,10.1 MB
+top-K per neuron,90%,COO,256,1.3 MB,2.4 MB,1 MB
+top-K per neuron,90%,CSR,256,1.1 MB,1.8 MB,632.8 KB
+top-K per neuron,95%,pruned dense,256,1.9 MB,11 MB,9.1 MB
+top-K per neuron,95%,dense+mask,256,2.1 MB,12.2 MB,10.1 MB
+top-K per neuron,95%,COO,256,1.1 MB,2.1 MB,982 KB
+top-K per neuron,95%,CSR,256,973.3 KB,1.6 MB,628.7 KB
+top-K per neuron,99%,pruned dense,256,1.9 MB,11 MB,9.1 MB
+top-K per neuron,99%,dense+mask,256,2.1 MB,12.2 MB,10.1 MB
+top-K per neuron,99%,COO,256,861.2 KB,1.8 MB,943.6 KB
+top-K per neuron,99%,CSR,256,843.8 KB,1.5 MB,625.7 KB
+random,50%,pruned dense,1,1.1 MB,9.6 MB,8.5 MB
+random,50%,dense+mask,1,1.3 MB,10.9 MB,9.6 MB
+random,50%,COO,1,2.7 MB,3.1 MB,477.7 KB
+random,50%,CSR,1,1.6 MB,1.6 MB,4.6 KB
+random,80%,pruned dense,1,1.1 MB,9.6 MB,8.5 MB
+random,80%,dense+mask,1,1.3 MB,10.9 MB,9.6 MB
+random,80%,COO,1,1.1 MB,1.3 MB,195.6 KB
+random,80%,CSR,1,650.8 KB,654.8 KB,4.1 KB
+random,90%,pruned dense,1,1.1 MB,9.6 MB,8.5 MB
+random,90%,dense+mask,1,1.3 MB,10.9 MB,9.6 MB
+random,90%,COO,1,539.6 KB,641 KB,101.4 KB
+random,90%,CSR,1,330.8 KB,334.8 KB,4.1 KB
+random,95%,pruned dense,1,1.1 MB,9.6 MB,8.5 MB
+random,95%,dense+mask,1,1.3 MB,10.9 MB,9.6 MB
+random,95%,COO,1,273.9 KB,328.2 KB,54.3 KB
+random,95%,CSR,1,171 KB,175.1 KB,4.1 KB
+random,99%,pruned dense,1,1.1 MB,9.6 MB,8.5 MB
+random,99%,dense+mask,1,1.3 MB,10.9 MB,9.6 MB
+random,99%,COO,1,60.9 KB,77.8 KB,16.9 KB
+random,99%,CSR,1,44 KB,48.1 KB,4.1 KB
+random,50%,pruned dense,32,1.2 MB,9.8 MB,8.6 MB
+random,50%,dense+mask,32,1.4 MB,11.1 MB,9.6 MB
+random,50%,COO,32,2.8 MB,3.4 MB,590.8 KB
+random,50%,CSR,32,1.7 MB,1.8 MB,117.8 KB
+random,80%,pruned dense,32,1.2 MB,9.8 MB,8.6 MB
+random,80%,dense+mask,32,1.4 MB,11.1 MB,9.6 MB
+random,80%,COO,32,1.2 MB,1.5 MB,307.7 KB
+random,80%,CSR,32,747.5 KB,841.7 KB,94.2 KB
+random,90%,pruned dense,32,1.2 MB,9.8 MB,8.6 MB
+random,90%,dense+mask,32,1.4 MB,11.1 MB,9.6 MB
+random,90%,COO,32,636.4 KB,849.4 KB,213 KB
+random,90%,CSR,32,427.5 KB,514 KB,86.5 KB
+random,95%,pruned dense,32,1.2 MB,9.8 MB,8.6 MB
+random,95%,dense+mask,32,1.4 MB,11.1 MB,9.6 MB
+random,95%,COO,32,370.7 KB,536.6 KB,165.9 KB
+random,95%,CSR,32,267.8 KB,350.2 KB,82.4 KB
+random,99%,pruned dense,32,1.2 MB,9.8 MB,8.6 MB
+random,99%,dense+mask,32,1.4 MB,11.1 MB,9.6 MB
+random,99%,COO,32,157.7 KB,286.2 KB,128.5 KB
+random,99%,CSR,32,140.8 KB,220.2 KB,79.4 KB
+random,50%,pruned dense,256,1.9 MB,11 MB,9.1 MB
+random,50%,dense+mask,256,2.1 MB,12.2 MB,10.1 MB
+random,50%,COO,256,3.5 MB,4.9 MB,1.4 MB
+random,50%,CSR,256,2.4 MB,3.1 MB,664.1 KB
+random,80%,pruned dense,256,1.9 MB,11 MB,9.1 MB
+random,80%,dense+mask,256,2.1 MB,12.2 MB,10.1 MB
+random,80%,COO,256,1.9 MB,3 MB,1.1 MB
+random,80%,CSR,256,1.4 MB,2.1 MB,640.5 KB
+random,90%,pruned dense,256,1.9 MB,11 MB,9.1 MB
+random,90%,dense+mask,256,2.1 MB,12.2 MB,10.1 MB
+random,90%,COO,256,1.3 MB,2.4 MB,1 MB
+random,90%,CSR,256,1.1 MB,1.8 MB,632.8 KB
+random,95%,pruned dense,256,1.9 MB,11 MB,9.1 MB
+random,95%,dense+mask,256,2.1 MB,12.2 MB,10.1 MB
+random,95%,COO,256,1.1 MB,2.1 MB,981 KB
+random,95%,CSR,256,970.2 KB,1.6 MB,628.7 KB
+random,99%,pruned dense,256,1.9 MB,11 MB,9.1 MB
+random,99%,dense+mask,256,2.1 MB,12.2 MB,10.1 MB
+random,99%,COO,256,860.2 KB,1.8 MB,943.6 KB
+random,99%,CSR,256,843.3 KB,1.5 MB,625.7 KB

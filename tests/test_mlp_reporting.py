@@ -31,7 +31,8 @@ def _benchmark(seed, method, sparsity, pruning_seed, storage_format, batch, rep,
             "requested_sparsity": sparsity, "pruning_seed": pruning_seed, "format": storage_format,
             "batch_size": batch, "repetition": rep, "timestamp": timestamp, "device": "cuda:1",
             "latency_ms": {"median": median}, "latency_is_debug_only": False, "measured_runs": 50,
-            "cuda_peak_allocated_bytes": 5000 + batch, "weight_storage_bytes": 1000,
+            "cuda_peak_allocated_bytes": 5000 + batch, "cuda_allocated_before_inference_bytes": 1000 + batch,
+            "weight_storage_bytes": 1000,
             "format_check": None if storage_format == "dense" else {"equivalent": True, "epsilon_logit": 1e-6}}
 
 
@@ -75,6 +76,7 @@ def test_aggregation(results_dir):
     point = bench[("magnitude", 0.5, "csr", 1)]
     assert point["latency"]["mean"] == pytest.approx(0.70) and point["latency"]["min"] == pytest.approx(0.20)
     assert point["units"] == 2 and point["min_reps"] == 3
+    assert point["resident"]["mean"] == 1001 and point["peak_minus_resident"]["mean"] == 4000
 
 
 def test_summary_files(results_dir, tmp_path):

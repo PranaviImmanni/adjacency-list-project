@@ -1,0 +1,292 @@
+{
+  "experiment": "mlp_baseline",
+  "status": "ok",
+  "timestamp": "2026-11-17T23:14:19.778114+00:00",
+  "checkpoint": {
+    "path": "/data/adjli/adjacency-list-project/checkpoints/fashion_mlp_seed44_cuda1.pt",
+    "sha256": "5c3f13f25fe868fe",
+    "dataset": "fashion_mnist",
+    "model_seed": 44,
+    "architecture": [
+      784,
+      300,
+      100,
+      10
+    ],
+    "best_epoch": 14,
+    "best_validation_accuracy": 0.8928,
+    "saved_test_accuracy": 0.8896,
+    "train_device": "cuda:1"
+  },
+  "model_seed": 44,
+  "best_epoch": 14,
+  "validation_accuracy": 0.8928,
+  "test_accuracy": 0.8896,
+  "data": {
+    "dataset": "fashion_mnist",
+    "num_train": 55000,
+    "num_val": 5000,
+    "num_test": 10000,
+    "num_features": 784,
+    "num_classes": 10,
+    "split_seed": 0,
+    "val_indices_sha256": "e1f4a1de3b6a5745",
+    "normalization": {
+      "mean": 0.2859254790097857,
+      "std": 0.35291387559514137,
+      "computed_on": "training split"
+    }
+  },
+  "training": {
+    "epochs": 30,
+    "train_batch_size": 128,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0,
+    "dtype": "float32",
+    "tf32": false
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.4900724844715812,
+      "val_loss": 0.40846288204193115,
+      "val_accuracy": 0.8488
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.35475457381335174,
+      "val_loss": 0.35690751671791077,
+      "val_accuracy": 0.8698
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.3164943175012415,
+      "val_loss": 0.35140204429626465,
+      "val_accuracy": 0.8682
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.28810579718893226,
+      "val_loss": 0.3478894531726837,
+      "val_accuracy": 0.8748
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.2659781538226388,
+      "val_loss": 0.33583304286003113,
+      "val_accuracy": 0.8806
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.25315572736913505,
+      "val_loss": 0.3384837508201599,
+      "val_accuracy": 0.8774
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.236592277711088,
+      "val_loss": 0.318219929933548,
+      "val_accuracy": 0.8856
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.2214245868769559,
+      "val_loss": 0.3179931640625,
+      "val_accuracy": 0.8872
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.211831496108662,
+      "val_loss": 0.3186854422092438,
+      "val_accuracy": 0.8854
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.20083298843990674,
+      "val_loss": 0.33151254057884216,
+      "val_accuracy": 0.8858
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.1895242269299247,
+      "val_loss": 0.333903431892395,
+      "val_accuracy": 0.8858
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.17707115996534173,
+      "val_loss": 0.32900452613830566,
+      "val_accuracy": 0.8856
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.16720303311347962,
+      "val_loss": 0.32844454050064087,
+      "val_accuracy": 0.8866
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.1593662703573704,
+      "val_loss": 0.3370702266693115,
+      "val_accuracy": 0.8928
+    },
+    {
+      "epoch": 15,
+      "train_loss": 0.15114414936845952,
+      "val_loss": 0.3496399521827698,
+      "val_accuracy": 0.8898
+    },
+    {
+      "epoch": 16,
+      "train_loss": 0.1478337167046287,
+      "val_loss": 0.3575868606567383,
+      "val_accuracy": 0.8892
+    },
+    {
+      "epoch": 17,
+      "train_loss": 0.1389762699213895,
+      "val_loss": 0.3520491123199463,
+      "val_accuracy": 0.8896
+    },
+    {
+      "epoch": 18,
+      "train_loss": 0.12979593442136592,
+      "val_loss": 0.374345064163208,
+      "val_accuracy": 0.8838
+    },
+    {
+      "epoch": 19,
+      "train_loss": 0.1266126081575047,
+      "val_loss": 0.3855471909046173,
+      "val_accuracy": 0.8844
+    },
+    {
+      "epoch": 20,
+      "train_loss": 0.1205821086471731,
+      "val_loss": 0.3761809468269348,
+      "val_accuracy": 0.8908
+    },
+    {
+      "epoch": 21,
+      "train_loss": 0.1189894217707894,
+      "val_loss": 0.3906610906124115,
+      "val_accuracy": 0.8906
+    },
+    {
+      "epoch": 22,
+      "train_loss": 0.10778552264300259,
+      "val_loss": 0.3945385217666626,
+      "val_accuracy": 0.8902
+    },
+    {
+      "epoch": 23,
+      "train_loss": 0.1034518904263323,
+      "val_loss": 0.43590429425239563,
+      "val_accuracy": 0.8836
+    },
+    {
+      "epoch": 24,
+      "train_loss": 0.10399957439574328,
+      "val_loss": 0.44350722432136536,
+      "val_accuracy": 0.886
+    },
+    {
+      "epoch": 25,
+      "train_loss": 0.09799257922606035,
+      "val_loss": 0.4557584524154663,
+      "val_accuracy": 0.8886
+    },
+    {
+      "epoch": 26,
+      "train_loss": 0.0972179941795089,
+      "val_loss": 0.45896947383880615,
+      "val_accuracy": 0.8898
+    },
+    {
+      "epoch": 27,
+      "train_loss": 0.08914603790830482,
+      "val_loss": 0.4576256275177002,
+      "val_accuracy": 0.8872
+    },
+    {
+      "epoch": 28,
+      "train_loss": 0.08455610493692485,
+      "val_loss": 0.49144935607910156,
+      "val_accuracy": 0.891
+    },
+    {
+      "epoch": 29,
+      "train_loss": 0.0819345699115233,
+      "val_loss": 0.48418211936950684,
+      "val_accuracy": 0.8878
+    },
+    {
+      "epoch": 30,
+      "train_loss": 0.07922116971043024,
+      "val_loss": 0.4775410592556,
+      "val_accuracy": 0.8916
+    }
+  ],
+  "config": {
+    "dataset": "fashion_mnist",
+    "hidden_dims": [
+      300,
+      100
+    ],
+    "val_size": 5000,
+    "split_seed": 0,
+    "model_seeds": [
+      42,
+      43,
+      44
+    ],
+    "epochs": 30,
+    "train_batch_size": 128,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0,
+    "pruned_layers": [
+      "fc1",
+      "fc2",
+      "fc3"
+    ],
+    "methods": [
+      "magnitude",
+      "topk_per_neuron",
+      "random"
+    ],
+    "sparsities": [
+      0.5,
+      0.8,
+      0.9,
+      0.95,
+      0.99
+    ],
+    "random_pruning_seeds": [
+      101,
+      102,
+      103
+    ],
+    "benchmark_random_seeds": [
+      101
+    ],
+    "batch_sizes": [
+      1,
+      32,
+      256
+    ],
+    "eval_batch_size": 256,
+    "dtype": "float32",
+    "tf32": false,
+    "warmup_runs": 20,
+    "measured_runs": 50,
+    "repetitions": 3
+  },
+  "device": "cuda:1",
+  "device_type": "cuda",
+  "torch_version": "2.14.1+cu130",
+  "cuda_version": "13.0",
+  "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.39",
+  "device_name": "NVIDIA GeForce RTX 3090",
+  "tf32_requested": false,
+  "fp32_precision_applied": "ieee"
+}

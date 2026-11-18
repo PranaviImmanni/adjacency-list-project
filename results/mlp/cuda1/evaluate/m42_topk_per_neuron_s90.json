@@ -1,0 +1,487 @@
+{
+  "schema_version": 1,
+  "experiment": "mlp_evaluate",
+  "status": "ok",
+  "checkpoint": {
+    "path": "/data/adjli/adjacency-list-project/checkpoints/fashion_mlp_seed42_cuda1.pt",
+    "sha256": "8f548ba007f65d2a",
+    "dataset": "fashion_mnist",
+    "model_seed": 42,
+    "architecture": [
+      784,
+      300,
+      100,
+      10
+    ],
+    "best_epoch": 27,
+    "best_validation_accuracy": 0.895,
+    "saved_test_accuracy": 0.8887,
+    "train_device": "cuda:1"
+  },
+  "model_seed": 42,
+  "device": "cuda:1",
+  "device_type": "cuda",
+  "torch_version": "2.14.1+cu130",
+  "cuda_version": "13.0",
+  "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.39",
+  "device_name": "NVIDIA GeForce RTX 3090",
+  "tf32_requested": false,
+  "fp32_precision_applied": "ieee",
+  "dtype": "float32",
+  "eval_batch_size": 256,
+  "eval_set": {
+    "val": 5000,
+    "test": 10000
+  },
+  "timestamp": "2026-11-17T23:14:41.889953+00:00",
+  "method": "topk_per_neuron",
+  "requested_sparsity": 0.9,
+  "pruning_seed": null,
+  "actual_sparsity": 0.8993238166791886,
+  "pruning": {
+    "method": "topk_per_neuron",
+    "scope": "per output neuron",
+    "pruning_seed": null,
+    "requested_sparsity": 0.9,
+    "actual_sparsity": 0.8993238166791886,
+    "pruned_weights": 266200,
+    "removed_weights": 239400,
+    "layers": {
+      "fc1": {
+        "shape": [
+          300,
+          784
+        ],
+        "numel": 235200,
+        "retained": 23700,
+        "removed": 211500,
+        "actual_sparsity": 0.8992346938775511,
+        "mask_sha256": "406ed26162ab16f4"
+      },
+      "fc2": {
+        "shape": [
+          100,
+          300
+        ],
+        "numel": 30000,
+        "retained": 3000,
+        "removed": 27000,
+        "actual_sparsity": 0.9,
+        "mask_sha256": "7d3da4d0148ab3b2"
+      },
+      "fc3": {
+        "shape": [
+          10,
+          100
+        ],
+        "numel": 1000,
+        "retained": 100,
+        "removed": 900,
+        "actual_sparsity": 0.9,
+        "mask_sha256": "d0af742979c8c3db"
+      }
+    }
+  },
+  "pruned_layers": [
+    "fc1",
+    "fc2",
+    "fc3"
+  ],
+  "accuracy": {
+    "val": 0.3338,
+    "test": 0.3416
+  },
+  "pruning_effect": {
+    "original_val_accuracy": 0.895,
+    "val_accuracy": 0.3338,
+    "val_accuracy_loss_pp": 56.120000000000005,
+    "original_test_accuracy": 0.8887,
+    "test_accuracy": 0.3416,
+    "test_accuracy_loss_pp": 54.71,
+    "prediction_disagreement_all": 0.6619333333333334,
+    "prediction_disagreement_test": 0.6606,
+    "mean_abs_logit_diff": 11.686708375536563,
+    "epsilon_logit": 100.04515838623047,
+    "margin": {
+      "all": {
+        "nodes": 15000,
+        "margin_condition_fraction": 0.0,
+        "disagreement_rate": 0.6619333333333334,
+        "disagreements": 9929,
+        "disagreements_satisfying_condition": 0,
+        "median_margin": 10.192278072237968,
+        "max_node_epsilon": 100.04515838623047
+      },
+      "test": {
+        "nodes": 10000,
+        "margin_condition_fraction": 0.0,
+        "disagreement_rate": 0.6606,
+        "disagreements": 6606,
+        "disagreements_satisfying_condition": 0,
+        "median_margin": 10.210099458694458,
+        "max_node_epsilon": 88.05902481079102
+      }
+    }
+  },
+  "format_checks": {
+    "dense_mask": {
+      "test_accuracy": 0.3416000008583069,
+      "reference_test_accuracy": 0.3416000008583069,
+      "accuracy_difference_pp": 0.0,
+      "prediction_agreement_test": 1.0,
+      "prediction_agreement_all": 1.0,
+      "mean_abs_logit_diff": 0.0,
+      "max_abs_logit_diff": 0.0,
+      "allclose": true,
+      "atol": 1e-05,
+      "rtol": 0.0001,
+      "epsilon_logit": 0.0,
+      "abs_accuracy_difference_pp": 0.0,
+      "margin": {
+        "all": {
+          "nodes": 15000,
+          "margin_condition_fraction": 1.0,
+          "disagreement_rate": 0.0,
+          "disagreements": 0,
+          "disagreements_satisfying_condition": 0,
+          "median_margin": 0.25802110508084297,
+          "max_node_epsilon": 0.0
+        },
+        "test": {
+          "nodes": 10000,
+          "margin_condition_fraction": 1.0,
+          "disagreement_rate": 0.0,
+          "disagreements": 0,
+          "disagreements_satisfying_condition": 0,
+          "median_margin": 0.2580113895237446,
+          "max_node_epsilon": 0.0
+        }
+      },
+      "equivalent": true,
+      "bitwise_equal": true,
+      "reference": "pruned dense on cuda:1"
+    },
+    "coo": {
+      "test_accuracy": 0.3416000008583069,
+      "reference_test_accuracy": 0.3416000008583069,
+      "accuracy_difference_pp": 0.0,
+      "prediction_agreement_test": 1.0,
+      "prediction_agreement_all": 1.0,
+      "mean_abs_logit_diff": 2.0000031217932702e-07,
+      "max_abs_logit_diff": 3.814697265625e-06,
+      "allclose": true,
+      "atol": 1e-05,
+      "rtol": 0.0001,
+      "epsilon_logit": 3.814697265625e-06,
+      "abs_accuracy_difference_pp": 0.0,
+      "margin": {
+        "all": {
+          "nodes": 15000,
+          "margin_condition_fraction": 1.0,
+          "disagreement_rate": 0.0,
+          "disagreements": 0,
+          "disagreements_satisfying_condition": 0,
+          "median_margin": 0.25802110508084297,
+          "max_node_epsilon": 3.814697265625e-06
+        },
+        "test": {
+          "nodes": 10000,
+          "margin_condition_fraction": 1.0,
+          "disagreement_rate": 0.0,
+          "disagreements": 0,
+          "disagreements_satisfying_condition": 0,
+          "median_margin": 0.2580113895237446,
+          "max_node_epsilon": 3.814697265625e-06
+        }
+      },
+      "equivalent": true,
+      "bitwise_equal": false,
+      "reference": "pruned dense on cuda:1"
+    },
+    "csr": {
+      "test_accuracy": 0.3416000008583069,
+      "reference_test_accuracy": 0.3416000008583069,
+      "accuracy_difference_pp": 0.0,
+      "prediction_agreement_test": 1.0,
+      "prediction_agreement_all": 1.0,
+      "mean_abs_logit_diff": 2.2506387904286386e-07,
+      "max_abs_logit_diff": 3.814697265625e-06,
+      "allclose": true,
+      "atol": 1e-05,
+      "rtol": 0.0001,
+      "epsilon_logit": 3.814697265625e-06,
+      "abs_accuracy_difference_pp": 0.0,
+      "margin": {
+        "all": {
+          "nodes": 15000,
+          "margin_condition_fraction": 1.0,
+          "disagreement_rate": 0.0,
+          "disagreements": 0,
+          "disagreements_satisfying_condition": 0,
+          "median_margin": 0.25802110508084297,
+          "max_node_epsilon": 3.814697265625e-06
+        },
+        "test": {
+          "nodes": 10000,
+          "margin_condition_fraction": 1.0,
+          "disagreement_rate": 0.0,
+          "disagreements": 0,
+          "disagreements_satisfying_condition": 0,
+          "median_margin": 0.2580113895237446,
+          "max_node_epsilon": 3.814697265625e-06
+        }
+      },
+      "equivalent": true,
+      "bitwise_equal": false,
+      "reference": "pruned dense on cuda:1"
+    }
+  },
+  "all_formats_equivalent": true,
+  "storage": {
+    "dense": {
+      "format": "dense",
+      "weight_bytes": 1064800,
+      "bias_bytes": 1640,
+      "layers": {
+        "fc1": {
+          "format": "dense",
+          "pruned": true,
+          "shape": [
+            300,
+            784
+          ],
+          "stored_values": 235200,
+          "weight_bytes": 940800,
+          "weight_bytes_breakdown": {
+            "values": 940800
+          },
+          "value_dtype": "torch.float32",
+          "index_dtype": null,
+          "mask_dtype": null,
+          "bias_bytes": 1200
+        },
+        "fc2": {
+          "format": "dense",
+          "pruned": true,
+          "shape": [
+            100,
+            300
+          ],
+          "stored_values": 30000,
+          "weight_bytes": 120000,
+          "weight_bytes_breakdown": {
+            "values": 120000
+          },
+          "value_dtype": "torch.float32",
+          "index_dtype": null,
+          "mask_dtype": null,
+          "bias_bytes": 400
+        },
+        "fc3": {
+          "format": "dense",
+          "pruned": true,
+          "shape": [
+            10,
+            100
+          ],
+          "stored_values": 1000,
+          "weight_bytes": 4000,
+          "weight_bytes_breakdown": {
+            "values": 4000
+          },
+          "value_dtype": "torch.float32",
+          "index_dtype": null,
+          "mask_dtype": null,
+          "bias_bytes": 40
+        }
+      }
+    },
+    "dense_mask": {
+      "format": "dense_mask",
+      "weight_bytes": 1331000,
+      "bias_bytes": 1640,
+      "layers": {
+        "fc1": {
+          "format": "dense_mask",
+          "pruned": true,
+          "shape": [
+            300,
+            784
+          ],
+          "stored_values": 235200,
+          "weight_bytes": 1176000,
+          "weight_bytes_breakdown": {
+            "values": 940800,
+            "mask": 235200
+          },
+          "value_dtype": "torch.float32",
+          "index_dtype": null,
+          "mask_dtype": "torch.bool",
+          "bias_bytes": 1200
+        },
+        "fc2": {
+          "format": "dense_mask",
+          "pruned": true,
+          "shape": [
+            100,
+            300
+          ],
+          "stored_values": 30000,
+          "weight_bytes": 150000,
+          "weight_bytes_breakdown": {
+            "values": 120000,
+            "mask": 30000
+          },
+          "value_dtype": "torch.float32",
+          "index_dtype": null,
+          "mask_dtype": "torch.bool",
+          "bias_bytes": 400
+        },
+        "fc3": {
+          "format": "dense_mask",
+          "pruned": true,
+          "shape": [
+            10,
+            100
+          ],
+          "stored_values": 1000,
+          "weight_bytes": 5000,
+          "weight_bytes_breakdown": {
+            "values": 4000,
+            "mask": 1000
+          },
+          "value_dtype": "torch.float32",
+          "index_dtype": null,
+          "mask_dtype": "torch.bool",
+          "bias_bytes": 40
+        }
+      }
+    },
+    "coo": {
+      "format": "coo",
+      "weight_bytes": 536000,
+      "bias_bytes": 1640,
+      "layers": {
+        "fc1": {
+          "format": "coo",
+          "pruned": true,
+          "shape": [
+            300,
+            784
+          ],
+          "stored_values": 23700,
+          "weight_bytes": 474000,
+          "weight_bytes_breakdown": {
+            "values": 94800,
+            "indices": 379200
+          },
+          "value_dtype": "torch.float32",
+          "index_dtype": "torch.int64",
+          "mask_dtype": null,
+          "bias_bytes": 1200
+        },
+        "fc2": {
+          "format": "coo",
+          "pruned": true,
+          "shape": [
+            100,
+            300
+          ],
+          "stored_values": 3000,
+          "weight_bytes": 60000,
+          "weight_bytes_breakdown": {
+            "values": 12000,
+            "indices": 48000
+          },
+          "value_dtype": "torch.float32",
+          "index_dtype": "torch.int64",
+          "mask_dtype": null,
+          "bias_bytes": 400
+        },
+        "fc3": {
+          "format": "coo",
+          "pruned": true,
+          "shape": [
+            10,
+            100
+          ],
+          "stored_values": 100,
+          "weight_bytes": 2000,
+          "weight_bytes_breakdown": {
+            "values": 400,
+            "indices": 1600
+          },
+          "value_dtype": "torch.float32",
+          "index_dtype": "torch.int64",
+          "mask_dtype": null,
+          "bias_bytes": 40
+        }
+      }
+    },
+    "csr": {
+      "format": "csr",
+      "weight_bytes": 324904,
+      "bias_bytes": 1640,
+      "layers": {
+        "fc1": {
+          "format": "csr",
+          "pruned": true,
+          "shape": [
+            300,
+            784
+          ],
+          "stored_values": 23700,
+          "weight_bytes": 286808,
+          "weight_bytes_breakdown": {
+            "values": 94800,
+            "col_indices": 189600,
+            "crow_indices": 2408
+          },
+          "value_dtype": "torch.float32",
+          "index_dtype": "torch.int64",
+          "mask_dtype": null,
+          "bias_bytes": 1200
+        },
+        "fc2": {
+          "format": "csr",
+          "pruned": true,
+          "shape": [
+            100,
+            300
+          ],
+          "stored_values": 3000,
+          "weight_bytes": 36808,
+          "weight_bytes_breakdown": {
+            "values": 12000,
+            "col_indices": 24000,
+            "crow_indices": 808
+          },
+          "value_dtype": "torch.float32",
+          "index_dtype": "torch.int64",
+          "mask_dtype": null,
+          "bias_bytes": 400
+        },
+        "fc3": {
+          "format": "csr",
+          "pruned": true,
+          "shape": [
+            10,
+            100
+          ],
+          "stored_values": 100,
+          "weight_bytes": 1288,
+          "weight_bytes_breakdown": {
+            "values": 400,
+            "col_indices": 800,
+            "crow_indices": 88
+          },
+          "value_dtype": "torch.float32",
+          "index_dtype": "torch.int64",
+          "mask_dtype": null,
+          "bias_bytes": 40
+        }
+      }
+    }
+  },
+  "logits_sha256": "9914d6b5c3e9b85c"
+}
