@@ -253,3 +253,40 @@ CPU runs (`--device cpu`) are for development only. They go to
    stays the same.
 5. **Python adjacency list:** Pranavi's bipartite list is for correctness and
    byte accounting only, as in the plan. It is not timed here.
+
+## 10. Exported bundle (for the adjacency-list benchmark)
+
+`exports/fashion_mlp_cuda1.npz` holds everything needed to run the trained
+models outside this pipeline. It is written by
+`python scripts/export_mlp_bundle.py --run cuda1` and needs only numpy to read:
+
+- **Weights and biases:** `m{S}_{fc1,fc2,fc3}_weight` and `_bias` for each model
+  seed S (42, 43, 44). Weights are (out, in), so a layer computes `h @ W.T + b`,
+  with ReLU after fc1 and fc2.
+- **Test set:** `x_test` (10,000 × 784, standardized exactly as in every run)
+  and `y_test`. The benchmark batches are `x_test[:B]` for B = 1, 32, 256.
+- **Masks:** `{tag}_{layer}_mask` for all 25 pruning conditions per seed, as bool
+  arrays where True = keep. `tag` is the condition name used in `results/`, e.g.
+  `m42_magnitude_s90` or `m42_random_p101_s90`. Each mask's hash equals the
+  `mask_sha256` in the evaluate and benchmark JSONs.
+- **Reference logits:** `m{S}_logits_test` (original model, full test set) and
+  `{tag}_logits_batch` (pruned dense, first 256 test images), both computed
+  on CPU. Use them to check that another implementation computes the same
+  function.
+- **Metadata:** `metadata`, a JSON string with the conventions, checkpoint
+  hashes, per-condition actual sparsity and test accuracy, and the benchmark
+  settings.
+
+```python
+import json
+import numpy as np
+
+b = np.load("exports/fashion_mlp_cuda1.npz")
+meta = json.loads(str(b["metadata"]))
+W1 = np.where(b["m42_magnitude_s90_fc1_mask"], b["m42_fc1_weight"], 0)  # pruned fc1
+```
+
+Before writing, the export script checks that the data split matches training.
+It then reloads the bundle with numpy alone and recomputes every model and
+condition from it. Finally it checks that every checkpoint and mask hash
+matches the committed results.

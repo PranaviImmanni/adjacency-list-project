@@ -3,6 +3,7 @@ __pycache__/
 .DS_Store
 .venv/
 .pytest_cache/
-checkpoints/
+checkpoints/*
+!checkpoints/fashion_mlp_seed*_cuda1.pt
 results/raw/
 results/mlp/*cpu*/
