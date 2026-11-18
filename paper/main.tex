@@ -1,0 +1,336 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{xcolor}
+
+\title{From Pruned Weight Matrices to Sparse Graphs:\\
+An Empirical Comparison of Neural-Network Storage Formats}
+\author{Pranavi Immanni\\
+CS 180 Individual Study\\
+San Jos\'e State University}
+\date{November 2026}
+
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Pruning can reduce the number of active neural-network weights, but storing a
+binary mask over a dense matrix may not provide the corresponding storage or
+execution benefits.  This paper presents a reproducible comparison of dense,
+dense-plus-mask, Coordinate (COO), Compressed Sparse Row (CSR), and weighted
+adjacency-list representations for pruned neural-network weight matrices.
+We study a fully connected Fashion-MNIST classifier with global magnitude,
+per-neuron top-k, and random pruning at sparsities from 50\% to 99\%.
+The study measures storage, inference latency, memory, prediction agreement,
+and energy when a reliable energy measurement is available.  We also define a
+lossless conversion from rectangular weight matrices to weighted bipartite
+adjacency lists.  The current analytical storage results show that CSR is
+substantially smaller than dense storage at high sparsity, while the runtime
+and energy conclusions require representation-level benchmarks.  \todo{Add
+final adjacency-list, latency, memory, and energy results before submission.}
+\end{abstract}
+
+\section{Introduction}
+
+Modern neural networks frequently contain weight matrices in which many
+parameters can be removed with limited effect on predictions.  A common
+implementation represents this sparsity with a dense tensor and a binary mask.
+Although this preserves the original matrix interface, it can retain much of
+the dense storage and computation cost.  Sparse formats instead store only
+nonzero values and the indices needed to locate them.
+
+This work studies whether a pruned neural-network weight matrix can be treated
+as a weighted graph and evaluated through sparse representations.  In
+particular, a rectangular matrix is converted into a directed bipartite graph:
+each output row is a row node, each input column is a column node, and a
+nonzero weight becomes a weighted edge from the row node to the column node.
+This construction permits a direct comparison between a graph-oriented
+adjacency list and standard sparse matrix formats.
+
+The central research question is:
+\begin{quote}
+When the same pruned weights are stored in different representations, which
+format provides the best trade-off among storage, inference efficiency, memory,
+and prediction preservation?
+\end{quote}
+
+The contributions of this study are:
+\begin{enumerate}
+    \item an implementation of signed magnitude, random, and per-neuron top-k
+    pruning with deterministic masks;
+    \item a lossless conversion of rectangular weight matrices into weighted
+    bipartite adjacency lists;
+    \item a controlled comparison of dense, dense-plus-mask, COO, CSR, and
+    adjacency-list representations using identical retained weights;
+    \item correctness and output-equivalence tests for the sparse forward
+    operations; and
+    \item a reproducible storage-cost model and benchmark protocol.
+\end{enumerate}
+
+\section{Background and Related Work}
+
+\subsection{Sparse matrix representations}
+
+COO stores a value together with its row and column indices for every stored
+entry.  It is simple to construct, but repeats row information for every
+nonzero.  CSR stores values and column indices for every nonzero together with
+one row-pointer array.  The row pointers remove the repeated row indices and
+make row-wise operations convenient.  These trade-offs are also reflected in
+standard sparse-array libraries, where COO is commonly used for construction
+and CSR is useful for arithmetic and vector products \cite{scipycoo}.
+
+An adjacency list stores, for each source node, a list of destination nodes and
+weights.  The project implementation uses Python dictionaries and lists for
+clarity.  Its analytical byte count is COO-like, but actual Python-object
+memory is larger and must be measured separately.
+
+\subsection{Pruning and truly sparse computation}
+
+Magnitude pruning ranks parameters by $|w|$, so negative weights are treated
+symmetrically with positive weights while their original signs are retained.
+Per-neuron top-k pruning ranks weights independently within each output row.
+Random pruning provides a seeded control condition.
+
+Recent work on truly sparse neural networks emphasizes that masked dense
+implementations may preserve dense execution, while sparse kernels can avoid
+materializing dense computations \cite{snack2026}.  Our study differs in scope:
+it compares portable representations, including adjacency lists, COO, and CSR,
+for pruned fully connected layers and reports the trade-offs of a direct
+reference implementation.
+
+\subsection{Neural-network compression}
+
+Neural-network compression includes pruning, quantization, factorization, and
+distillation.  Deep Compression combines pruning with trained quantization and
+Huffman coding, demonstrating that storage reductions can be much larger than
+the reduction in the number of nonzero connections alone \cite{deepcompression}.
+Our study deliberately isolates the representation question: all formats use
+the same full-precision retained weights, so a difference in storage or
+latency can be attributed to the representation rather than to quantization or
+entropy coding.
+
+Magnitude pruning is a simple post-training baseline, but the resulting
+unstructured sparsity does not automatically translate into a hardware
+speedup.  The Lottery Ticket Hypothesis studies whether sparse subnetworks can
+retain the trainability of dense networks \cite{lotteryticket}.  Dynamic sparse
+training methods such as RigL change the sparse connectivity during training
+and target sparse-to-sparse computation \cite{rigl}.  These works focus on how
+to find or train sparse subnetworks.  Our focus is downstream: given a fixed
+pruned matrix, how should it be stored and evaluated?
+
+\subsection{Sparse execution and hardware effects}
+
+The distinction between logical sparsity and realized efficiency is central to
+this paper.  A mask can make entries logically inactive while leaving dense
+matrix multiplication and dense memory allocation in the execution path.
+Conversely, a sparse representation introduces index reads, irregular memory
+accesses, conversion costs, and format-specific kernel overhead.  Prior work
+has shown that structured sparsity can be easier for hardware to exploit than
+unstructured sparsity; for example, structured dynamic sparse training reports
+different CPU and GPU behavior for sparse linear layers \cite{srigl}.
+
+SNACK is a particularly relevant recent system because it provides a custom
+COO-based GPU kernel and explicitly targets truly sparse execution
+\cite{snack2026}.  It is a systems contribution with optimized CUDA kernels,
+training support, and large-scale GPU experiments.  We do not claim to match
+that scope.  Instead, our contribution is a smaller and more transparent
+comparison that includes a Python adjacency-list representation and uses the
+same pruned weights across all formats.  This makes the study useful as a
+baseline for understanding where a graph-oriented representation helps or
+fails before investing in specialized kernels.
+
+\subsection{Positioning and distinction}
+
+The novelty of this paper is not a new pruning criterion and not a new COO or
+CSR data structure.  The intended contribution is an empirical, reproducible
+comparison of standard sparse formats and a weighted bipartite adjacency list
+for neural-network weight matrices.  The comparison combines four properties
+that are often evaluated separately: structural storage, actual inference
+latency, memory behavior, and output equivalence.
+
+\begin{table}[ht]
+\centering
+\caption{Positioning relative to representative prior work.}
+\label{tab:positioning}
+\small
+\begin{tabular}{p{0.22\linewidth}p{0.18\linewidth}p{0.18\linewidth}p{0.30\linewidth}}
+\toprule
+Work & Main object & Primary contribution & Relation to this study \\
+\midrule
+Deep Compression & Neural-network parameters & Pruning, quantization, and coding & We hold value precision fixed and isolate storage formats. \\
+Lottery Ticket Hypothesis & Sparse subnetworks & Trainability and initialization of sparse tickets & We start from fixed trained weights and study inference representation. \\
+RigL / structured DST & Sparse training & Dynamic connectivity and structured sparsity & We do not propose a training algorithm; we compare fixed sparse layouts. \\
+SNACK & Sparse GPU layers & Custom sparse kernels and end-to-end GPU efficiency & We provide a portable reference comparison including adjacency lists. \\
+This work & Pruned MLP weight matrices & Storage, execution, and equivalence comparison & Same masks and weights across dense, mask, COO, CSR, and adjacency-list formats. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The distinction should be stated honestly in the final paper: this is a
+systems-oriented empirical study and reproducibility baseline, not a claim
+that adjacency lists replace optimized sparse GPU kernels in every regime.
+
+\section{Research Questions}
+
+\begin{description}
+    \item[RQ1:] How does storage scale with sparsity for dense, masked dense,
+    COO, CSR, and adjacency-list representations?
+    \item[RQ2:] Do sparse representations preserve the predictions and raw
+    outputs of the corresponding pruned dense model?
+    \item[RQ3:] Which representation provides the lowest inference latency at
+    different sparsities and batch sizes?
+    \item[RQ4:] Do analytical storage savings appear in actual memory usage?
+    \item[RQ5:] What energy differences can be measured on the available
+    hardware without relying on estimates?
+\end{description}
+
+\section{Methodology}
+
+\subsection{Model and data}
+
+The primary model is a fully connected Fashion-MNIST classifier with layer
+dimensions $784\rightarrow300\rightarrow100\rightarrow10$, commonly called
+LeNet-300-100.  ReLU activations occur between linear layers.  The current
+baseline artifacts report a test accuracy of 0.8887 for one trained model.
+\todo{Document all three model seeds, dataset preprocessing, and checkpoint
+identifiers in the final version.}
+
+\subsection{Pruning conditions}
+
+We evaluate global magnitude, per-neuron top-k, and seeded random pruning at
+50\%, 80\%, 90\%, 95\%, and 99\% requested sparsity.  All storage formats use
+the same mask for a given pruning condition.  This isolates representation
+effects from differences in which weights were retained.
+
+Global magnitude pruning removes one globally ranked set of weights across all
+layers.  Top-k pruning removes
+$\lfloor s d_{\mathrm{in}}\rfloor$ entries from every output row of width
+$d_{\mathrm{in}}$.  Random pruning uses a fixed seed and a global permutation.
+Ties use deterministic layer and row-major ordering.
+
+\subsection{Representations}
+
+The evaluated representations are:
+\begin{itemize}
+    \item \textbf{pruned dense}: a dense tensor with removed entries set to
+    zero;
+    \item \textbf{dense plus mask}: the original dense tensor multiplied by a
+    Boolean mask during the forward pass;
+    \item \textbf{COO}: values, row indices, and column indices;
+    \item \textbf{CSR}: values, column indices, and per-layer row pointers;
+    \item \textbf{adjacency list}: a weighted row-to-column bipartite list.
+\end{itemize}
+
+For a weight matrix $W\in\mathbb{R}^{m\times n}$, the bipartite mapping uses
+row nodes $0,\ldots,m-1$ and column nodes $m,\ldots,m+n-1$.  Each nonzero
+$W_{ij}$ creates the edge $i\rightarrow m+j$ with weight $W_{ij}$.  Forward
+propagation iterates the outgoing edges of each row node and accumulates the
+corresponding input values.
+
+\subsection{Metrics}
+
+For every condition and batch size, we report:
+\begin{enumerate}
+    \item test accuracy;
+    \item maximum absolute difference from the pruned dense output;
+    \item prediction match rate;
+    \item median and 95th-percentile inference latency;
+    \item structural storage bytes;
+    \item peak runtime memory using the platform-appropriate profiler; and
+    \item energy only when directly measured by hardware instrumentation.
+\end{enumerate}
+
+Conversion time is reported separately from repeated inference time.  The
+storage model uses 4-byte values, 8-byte indices, and one byte per mask entry
+unless otherwise noted.
+
+\section{Results}
+
+\subsection{Analytical storage}
+
+The model contains 266,200 weights, so dense fp32 storage is 1,064,800 bytes.
+Dense-plus-mask storage is 1,331,000 bytes.  For CSR, the three layers add
+$301+101+11=413$ row-pointer entries.
+
+\begin{table}[ht]
+\centering
+\caption{Analytical storage for the LeNet-300-100 weights. Values use fp32
+weights and 64-bit indices.}
+\label{tab:storage}
+\begin{tabular}{lrrrrr}
+\toprule
+Sparsity & Dense & Dense+mask & COO & CSR & CSR / dense \\
+\midrule
+50\% & 1,064,800 & 1,331,000 & 2,662,000 & 1,600,504 & 150.3\% \\
+80\% & 1,064,800 & 1,331,000 & 1,064,800 & 642,184 & 60.3\% \\
+90\% & 1,064,800 & 1,331,000 & 532,400 & 322,744 & 30.3\% \\
+95\% & 1,064,800 & 1,331,000 & 266,200 & 163,024 & 15.3\% \\
+99\% & 1,064,800 & 1,331,000 & 53,240 & 35,248 & 3.3\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+At 90\% sparsity, changing CSR indices from 64-bit to 32-bit reduces the
+analytical cost to 214,612 bytes, or 20.15\% of dense fp32 storage.  Using
+32-bit indices and fp16 values gives 161,372 bytes, or 15.16\%.
+
+These values are structural accounting, not measurements of the full Python
+object graph or process peak memory.  The generated comparison file is
+`reports/cost_model_vs_measured.csv`.
+
+\subsection{Prediction preservation}
+
+The conversion and list-matvec tests pass for rectangular matrices, negative
+weights, empty rows, symmetric bipartite graphs, and three-layer MLP forward
+propagation.  The format-level Fashion-MNIST results are included in the
+project's benchmark artifacts.  \todo{Add the final table of test accuracy,
+prediction agreement, and maximum output error.}
+
+\subsection{Latency, memory, and energy}
+
+\todo{Add benchmark tables and plots after the adjacency-list experiment is
+run using the same trained checkpoint and test set as the existing formats.}
+
+\section{Discussion}
+
+The storage model predicts that CSR becomes smaller than dense storage once
+sparsity is sufficiently high, while COO pays for two indices per nonzero.
+Dense-plus-mask remains larger than dense under the byte accounting used here
+because every weight and every mask entry is retained.  These structural
+predictions do not imply a runtime speedup: sparse kernels can have indexing,
+launch, and Python-object overheads, especially for small matrices or small
+batches.  The benchmark therefore treats storage and execution as separate
+questions.
+
+\todo{Discuss the measured crossover points, batch-size effects, and the
+difference between Python adjacency lists and compiled sparse kernels.}
+
+\section{Limitations}
+
+This study uses one fully connected architecture and one dataset.  The
+adjacency-list reference implementation is written in Python and should not be
+interpreted as a production GPU sparse kernel.  Actual energy results depend on
+available hardware instrumentation.  Finally, analytical storage estimates
+exclude allocator overhead, object headers, and temporary tensors; those costs
+must be reported separately from structural bytes.
+
+\section{Conclusion}
+
+This paper establishes a controlled framework for converting pruned neural
+network weight matrices into sparse graph representations and comparing them
+with standard sparse formats.  The current storage analysis shows substantial
+CSR savings at high sparsity while preserving the dense model's parameter
+values in the sparse representations.  \todo{Replace this preliminary
+conclusion with the final latency, memory, energy, and adjacency-list findings.}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
