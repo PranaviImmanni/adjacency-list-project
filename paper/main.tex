@@ -349,6 +349,37 @@ fine-tuning experiment rather than supporting a claim that statistical
 thresholding preserves accuracy without retraining.  The raw measurements are
 stored in `reports/statistical_graph_conversion.csv`.
 
+\subsection{Edge-type ablation}
+
+To test whether the sign of a connection is useful as an edge type, we also
+evaluated three policies: retain both signs using the magnitude threshold,
+retain only positive edges using statistics of positive magnitudes, and retain
+only negative edges using statistics of negative magnitudes.  At $r=0$, the
+three-seed results were:
+
+\begin{table}[ht]
+\centering
+\caption{Edge-type ablation at $r=0$. Values are mean $\pm$ standard deviation
+across seeds 42, 43, and 44.}
+\label{tab:edgeablation}
+\small
+\begin{tabular}{lrrr}
+\toprule
+Edge policy & Sparsity & Accuracy & Positive / negative edges \\
+\midrule
+Both signs & $61.10\%\pm0.06\%$ & $83.43\%\pm2.07\%$ & $50,517 / 53,034$ \\
+Positive only & $80.08\%\pm0.02\%$ & $17.08\%\pm3.46\%$ & $53,038 / 0$ \\
+Negative only & $80.90\%\pm0.07\%$ & $11.15\%\pm2.01\%$ & $0 / 50,831$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+For this model, retaining both signs is substantially more accurate than
+keeping either sign alone.  This supports treating sign as metadata or an edge
+type while retaining both positive and negative connections, rather than
+discarding one sign by default.  The complete ablation is stored in
+`reports/statistical_edge_type_ablation.csv`.
+
 \subsection{Prediction preservation}
 
 The conversion and list-matvec tests pass for rectangular matrices, negative
@@ -389,6 +420,9 @@ approximately 2.75 times slower despite using fewer stored values.
 The benchmark is recorded in
 `reports/adjacency_list_mlp_benchmark.csv`.  These CPU measurements are not
 directly comparable to the existing CUDA measurements in Minh's artifacts.
+The statistical benchmark also records peak allocations observed by
+`tracemalloc` during the Python timing region.  These values describe traced
+Python allocations, not total resident process memory or GPU allocation.
 Energy remains unavailable and is not estimated.
 
 \section{Discussion}

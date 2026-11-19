@@ -10,6 +10,7 @@ change Minh's results. It reports one row per model seed and r value.
 
 import argparse
 import csv
+import tracemalloc
 import time
 from pathlib import Path
 
@@ -48,23 +49,44 @@ def timed(function, warmups, repeats):
     for _ in range(warmups):
         function()
     samples = []
-    for _ in range(repeats):
-        start = time.perf_counter()
-        function()
-        samples.append((time.perf_counter() - start) * 1000.0)
-    return float(np.median(samples)), float(np.percentile(samples, 95))
+    tracemalloc.start()
+    try:
+        for _ in range(repeats):
+            start = time.perf_counter()
+            function()
+            samples.append((time.perf_counter() - start) * 1000.0)
+        _, peak = tracemalloc.get_traced_memory()
+    finally:
+        tracemalloc.stop()
+    return float(np.median(samples)), float(np.percentile(samples, 95)), int(peak)
 
 
-def build_statistical_masks(weights, r):
+def build_statistical_masks(weights, r, edge_policy):
     masks = []
     thresholds = []
     for weight in weights:
-        magnitudes = np.abs(weight)
+        if edge_policy == "both_signs":
+            magnitudes = np.abs(weight)
+        elif edge_policy == "positive_only":
+            magnitudes = weight[weight > 0]
+        elif edge_policy == "negative_only":
+            magnitudes = np.abs(weight[weight < 0])
+        else:
+            raise ValueError("unknown edge policy: {}".format(edge_policy))
+        if magnitudes.size == 0:
+            thresholds.append(float("inf"))
+            masks.append(np.zeros(weight.shape, dtype=bool))
+            continue
         mean = float(magnitudes.mean())
         std = float(magnitudes.std())
         threshold = mean + r * std
         thresholds.append(threshold)
-        masks.append(magnitudes > threshold)
+        if edge_policy == "both_signs":
+            masks.append(np.abs(weight) > threshold)
+        elif edge_policy == "positive_only":
+            masks.append(weight > threshold)
+        else:
+            masks.append(weight < -threshold)
     return masks, thresholds
 
 
@@ -74,6 +96,7 @@ def main():
     parser.add_argument("--output", default="reports/statistical_graph_conversion.csv")
     parser.add_argument("--model-seeds", default="42,43,44")
     parser.add_argument("--r-values", default="0,0.5,1,1.5,2")
+    parser.add_argument("--edge-policies", default="both_signs")
     parser.add_argument("--accuracy-examples", type=int, default=10000)
     parser.add_argument("--timing-examples", type=int, default=512)
     parser.add_argument("--batch-size", type=int, default=32)
@@ -84,6 +107,7 @@ def main():
     bundle = np.load(args.bundle, allow_pickle=False)
     seeds = [int(value) for value in args.model_seeds.split(",") if value.strip()]
     r_values = [float(value) for value in args.r_values.split(",") if value.strip()]
+    edge_policies = [value.strip() for value in args.edge_policies.split(",") if value.strip()]
     rows = []
 
     for seed in seeds:
@@ -100,8 +124,9 @@ def main():
         original_predictions = np.argmax(original_logits, axis=1)
         original_accuracy = float(np.mean(original_predictions == y[:n_accuracy]))
 
-        for r in r_values:
-            masks, thresholds = build_statistical_masks(weights, r)
+        for edge_policy in edge_policies:
+          for r in r_values:
+            masks, thresholds = build_statistical_masks(weights, r, edge_policy)
             masked_weights = [np.where(mask, weight, 0.0)
                               for weight, mask in zip(weights, masks)]
             build_start = time.perf_counter()
@@ -126,10 +151,11 @@ def main():
                                   for batch in batches]
             dense_call = lambda: [forward_dense(masked_weights, biases, batch)
                                   for batch in batches]
-            graph_median, graph_p95 = timed(graph_call, args.warmups, args.repeats)
-            dense_median, dense_p95 = timed(dense_call, args.warmups, args.repeats)
+            graph_median, graph_p95, graph_peak = timed(graph_call, args.warmups, args.repeats)
+            dense_median, dense_p95, dense_peak = timed(dense_call, args.warmups, args.repeats)
             row = {
-                "model_seed": seed, "r": r, "threshold_rule": "abs(w) > mean_abs + r*std_abs",
+                "model_seed": seed, "edge_policy": edge_policy, "r": r,
+                "threshold_rule": "layer statistics with signed edge policy",
                 "accuracy": float(np.mean(graph_predictions == y[:n_accuracy])),
                 "dense_accuracy": original_accuracy,
                 "accuracy_delta_pp": 100.0 * (float(np.mean(graph_predictions == y[:n_accuracy])) - original_accuracy),
@@ -142,12 +168,14 @@ def main():
                 "threshold_fc3": thresholds[2], "dense_cpu_median_ms": dense_median,
                 "dense_cpu_p95_ms": dense_p95, "graph_cpu_median_ms": graph_median,
                 "graph_cpu_p95_ms": graph_p95, "conversion_time_ms": conversion_ms,
+                "dense_peak_python_bytes": dense_peak, "graph_peak_python_bytes": graph_peak,
                 "energy_joules": "",
             }
             rows.append(row)
-            print("seed={} r={} sparsity={:.3f} accuracy={:.4f} match={:.4f} graph_ms={:.2f}".format(
-                seed, r, row["overall_sparsity"], row["accuracy"],
+            print("seed={} policy={} r={} sparsity={:.3f} accuracy={:.4f} match={:.4f} graph_ms={:.2f}".format(
+                seed, edge_policy, r, row["overall_sparsity"], row["accuracy"],
                 row["graph_vs_threshold_dense_match"], row["graph_cpu_median_ms"]))
+          
 
     fields = list(rows[0].keys())
     output = Path(args.output)
