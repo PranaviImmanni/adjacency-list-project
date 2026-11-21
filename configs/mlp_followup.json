@@ -1,0 +1,13 @@
+{
+  "base_config": "configs/mlp_fashion_mnist.json",
+  "experiments": ["statistical", "finetune", "protect_fc3", "lora", "int8"],
+  "statistical_k": [0.5, 1, 1.5, 2],
+  "recovery_sparsities": [0.8, 0.9],
+  "recovery_epochs": 10,
+  "recovery_learning_rates": [0.001, 0.0003, 0.0001],
+  "recovery_batch_size": 128,
+  "protected_layers": ["fc3"],
+  "lora_rank": 4,
+  "lora_alpha": 4,
+  "lora_layers": ["fc1", "fc2", "fc3"]
+}

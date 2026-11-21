@@ -156,6 +156,23 @@ python scripts/run_mlp_experiments.py --stage benchmark --device cuda:1   # ~1,6
 python scripts/summarize_mlp_results.py --results-dir results/mlp/cuda1
 ```
 
+### MLP follow-up: statistical pruning, recovery, protected output layer, LoRA, INT8
+
+Five follow-up experiments reuse the sweep above as their baselines:
+- the professor's statistical rule (keep |w - mean| > k std), compared with global magnitude at the same retained count;
+- masked fine-tuning;
+- a dense output layer at matched storage;
+- rank-4 LoRA adapters;
+- INT8 without pruning.
+
+Plan, choices and controls are in `docs/mlp_followup_plan.md`. Seed 42 first:
+
+```bash
+python scripts/run_mlp_followup.py --experiments statistical --stage all --seeds 42 --device cuda:1
+python scripts/run_mlp_followup.py --experiments finetune protect_fc3 lora int8 --stage all --seeds 42 --device cuda:1
+python scripts/summarize_mlp_followup.py --run cuda1
+```
+
 ### Existing utilities
 
 ```bash

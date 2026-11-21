@@ -33,3 +33,36 @@ def load_config(path=DEFAULT_CONFIG_PATH):
     if not all(0 < s < 1 for s in config["sparsities"]):
         raise ValueError(f"{path}: sparsities must be in (0, 1)")
     return config
+
+
+FOLLOWUP_CONFIG_PATH = PROJECT_ROOT / "configs" / "mlp_followup.json"
+FOLLOWUP_KEYS = {
+    "base_config", "experiments", "statistical_k", "recovery_sparsities", "recovery_epochs",
+    "recovery_learning_rates", "recovery_batch_size", "protected_layers", "lora_rank", "lora_alpha", "lora_layers",
+}
+FOLLOWUP_EXPERIMENTS = ("statistical", "finetune", "protect_fc3", "lora", "int8")
+
+
+def load_followup_config(path=FOLLOWUP_CONFIG_PATH):
+    """The follow-up experiments' settings on top of the original experiment's (base) config.
+
+    Every setting of the original experiment (data split, batch sizes, timing,
+    precision, pruned layers) is inherited unchanged; a follow-up key may not
+    override a base key.
+    """
+    with open(path) as f:
+        followup = json.load(f)
+    missing = FOLLOWUP_KEYS - followup.keys()
+    unknown = followup.keys() - FOLLOWUP_KEYS
+    if missing or unknown:
+        raise ValueError(f"{path}: missing keys {sorted(missing)}, unknown keys {sorted(unknown)}")
+    if set(followup["experiments"]) - set(FOLLOWUP_EXPERIMENTS):
+        raise ValueError(f"{path}: experiments must be among {FOLLOWUP_EXPERIMENTS}")
+    if not all(k >= 0 for k in followup["statistical_k"]):
+        raise ValueError(f"{path}: statistical_k must be >= 0")
+    base = load_config(PROJECT_ROOT / followup["base_config"])
+    if followup.keys() & base.keys():
+        raise ValueError(f"{path}: may not override base settings {sorted(followup.keys() & base.keys())}")
+    if set(followup["recovery_sparsities"]) - set(base["sparsities"]):
+        raise ValueError(f"{path}: recovery_sparsities must be levels of the original sweep (reused as baselines)")
+    return {**base, **followup}

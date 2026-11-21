@@ -7,3 +7,4 @@ checkpoints/*
 !checkpoints/fashion_mlp_seed*_cuda1.pt
 results/raw/
 results/mlp/*cpu*/
+results/mlp_followup/*cpu*/

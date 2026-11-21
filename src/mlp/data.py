@@ -125,8 +125,14 @@ class ImageData:
         return x, y, val_mask, ~val_mask
 
 
-def split_and_normalize(images, labels, test_images, test_labels, val_size, split_seed):
-    """Fixed train/val split and train-split standardization. Inputs are uint8 tensors."""
+def split_and_normalize(images, labels, test_images, test_labels, val_size, split_seed, normalization=None):
+    """Fixed train/val split and train-split standardization. Inputs are uint8 tensors.
+
+    normalization: optional (mean, std) to use instead of this machine's own
+    float64 reduction over the training split. The two differ only in the
+    ~11th digit between machines, but passing a checkpoint's saved constants
+    reproduces the training machine's inputs bit for bit.
+    """
     n = len(labels)
     order = torch.randperm(n, generator=torch.Generator().manual_seed(split_seed))
     val_idx, train_idx = order[:val_size].sort().values, order[val_size:].sort().values
@@ -136,6 +142,10 @@ def split_and_normalize(images, labels, test_images, test_labels, val_size, spli
 
     train = flat(images[train_idx])
     mean, std = train.mean().item(), train.std().item()
+    if normalization is not None:
+        if abs(normalization[0] - mean) > 1e-9 or abs(normalization[1] - std) > 1e-9:
+            raise ValueError("saved normalization differs by more than float64 rounding: not the same training data")
+        mean, std = normalization
 
     def norm(t):
         return ((t - mean) / std).to(torch.float32)
@@ -150,8 +160,18 @@ def split_and_normalize(images, labels, test_images, test_labels, val_size, spli
     )
 
 
-def load_fashion_mnist(val_size=5000, split_seed=0, raw_dir=RAW_DIR):
+def load_fashion_mnist(val_size=5000, split_seed=0, raw_dir=RAW_DIR, normalization=None):
     raw_dir = download(raw_dir)
     tensors = {key: read_idx_gz(raw_dir / name) for key, (name, _) in FILES.items()}
     return split_and_normalize(tensors["train_images"], tensors["train_labels"],
-                               tensors["test_images"], tensors["test_labels"], val_size, split_seed)
+                               tensors["test_images"], tensors["test_labels"], val_size, split_seed, normalization)
+
+
+def load_for_checkpoint(checkpoint, raw_dir=RAW_DIR):
+    """The data split and standardization a checkpoint was trained with, bit for bit, on any machine."""
+    saved = checkpoint["data"]
+    norm = saved["normalization"]
+    data = load_fashion_mnist(saved["num_val"], saved["split_seed"], raw_dir, (norm["mean"], norm["std"]))
+    if data.val_indices_sha256 != saved["val_indices_sha256"]:
+        raise ValueError("validation split differs from the one the checkpoint was trained with")
+    return data

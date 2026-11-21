@@ -60,13 +60,21 @@ def _split(flat_keep, weights):
     return masks
 
 
-def _keep_masks(weights, method, sparsity, pruning_seed):
+def _cpu_matrices(weights):
     weights = {name: w.detach().to("cpu") for name, w in weights.items()}
     for name, w in weights.items():
         if w.dim() != 2:
             raise ValueError(f"{name}: expected a 2-D weight, got shape {tuple(w.shape)}")
+    return weights
+
+
+def _keep_masks(weights, method, sparsity, pruning_seed, removed=None):
+    """Keep-masks; `removed` (global methods only) overrides floor(sparsity * N)."""
+    weights = _cpu_matrices(weights)
 
     if method == "topk_per_neuron":
+        if removed is not None:
+            raise ValueError("top-K per neuron removes a count per row; an exact total is not supported")
         masks = {}
         for name, w in weights.items():
             keep = torch.ones(w.shape, dtype=torch.bool)
@@ -76,7 +84,9 @@ def _keep_masks(weights, method, sparsity, pruning_seed):
         return masks
 
     total = sum(w.numel() for w in weights.values())
-    k = removal_count(total, sparsity)
+    k = removal_count(total, sparsity) if removed is None else removed
+    if not 0 <= k <= total:
+        raise ValueError(f"cannot remove {k} of {total} weights")
     if method == "magnitude":
         flat = torch.cat([w.abs().flatten() for w in weights.values()])
         order = torch.sort(flat, stable=True).indices
@@ -95,9 +105,7 @@ def mask_sha256(mask):
     return hashlib.sha256(mask.to(torch.uint8).numpy().tobytes()).hexdigest()[:16]
 
 
-def prune_layers(weights, method, sparsity, pruning_seed=None):
-    """Masks for the pruned layers plus requested and actual sparsity, per layer and overall."""
-    masks = _keep_masks(weights, method, sparsity, pruning_seed)
+def _summary(masks, **fields):
     layers = {}
     for name, mask in masks.items():
         retained = int(mask.sum())
@@ -107,10 +115,53 @@ def prune_layers(weights, method, sparsity, pruning_seed=None):
                         "mask_sha256": mask_sha256(mask)}
     total = sum(layer["numel"] for layer in layers.values())
     removed = sum(layer["removed"] for layer in layers.values())
-    summary = {"method": method, "scope": "per output neuron" if method == "topk_per_neuron" else "global",
-               "pruning_seed": pruning_seed if method == "random" else None,
-               "requested_sparsity": sparsity, "actual_sparsity": removed / total,
-               "pruned_weights": total, "removed_weights": removed, "layers": layers}
+    return {**fields, "actual_sparsity": removed / total, "pruned_weights": total, "removed_weights": removed,
+            "retained_weights": total - removed, "layers": layers}
+
+
+def prune_layers(weights, method, sparsity, pruning_seed=None):
+    """Masks for the pruned layers plus requested and actual sparsity, per layer and overall."""
+    masks = _keep_masks(weights, method, sparsity, pruning_seed)
+    summary = _summary(masks, method=method,
+                       scope="per output neuron" if method == "topk_per_neuron" else "global",
+                       pruning_seed=pruning_seed if method == "random" else None, requested_sparsity=sparsity)
+    return {"masks": masks, "summary": summary}
+
+
+def prune_to_count(weights, method, retained, pruning_seed=None):
+    """Global magnitude or random pruning that keeps exactly `retained` weights in total.
+
+    Used for baselines matched to another rule's retained-weight count. Same
+    ordering and ties as prune_layers.
+    """
+    if method not in ("magnitude", "random"):
+        raise ValueError("an exact retained count needs a global method (magnitude or random)")
+    total = sum(w.numel() for w in weights.values())
+    masks = _keep_masks(weights, method, None, pruning_seed, removed=total - retained)
+    summary = _summary(masks, method=method, scope="global", pruning_seed=pruning_seed if method == "random" else None,
+                       requested_sparsity=None, requested_retained=retained)
+    return {"masks": masks, "summary": summary}
+
+
+def prune_statistical(weights, k):
+    """The professor's rule: per weight matrix, keep w when |w - mu| > k * sigma.
+
+    mu and sigma are the mean and population standard deviation (ddof = 0) of
+    that matrix's original weights (biases excluded), computed in float64.
+    The inequality is strict. Retained weights keep their values and signs.
+    """
+    if k < 0:
+        raise ValueError(f"k must be >= 0, got {k}")
+    masks, stats = {}, {}
+    for name, w in _cpu_matrices(weights).items():
+        w64 = w.to(torch.float64)
+        mu, sigma = w64.mean().item(), w64.std(correction=0).item()
+        masks[name] = (w64 - mu).abs() > k * sigma
+        stats[name] = {"mean": mu, "std": sigma, "threshold": k * sigma}
+    summary = _summary(masks, method="statistical", scope="per weight matrix", pruning_seed=None,
+                       requested_sparsity=None, k=k, std="population (ddof=0)", rule="keep |w - mean| > k * std")
+    for name, values in stats.items():
+        summary["layers"][name].update(values)
     return {"masks": masks, "summary": summary}
 
 

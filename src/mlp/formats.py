@@ -18,6 +18,12 @@ function; only the floating-point summation order differs.
 
 Biases are always dense and never pruned. They are counted separately from
 the weight storage.
+
+Low-rank adapters (LoRA) are optional per layer and always stay separate from
+the stored weight: a layer computes W x + B (A x) + b, with A (rank x in) and
+B (out x rank) dense FP32 (B already includes the alpha / rank scale). They
+are never merged into W, so a sparse W stays sparse. Their bytes are reported
+as adapter_bytes, next to weight_bytes.
 """
 
 import torch
@@ -45,14 +51,15 @@ def sparse_from_mask(weight, mask):
 class StoredLayer:
     """One Linear layer in one storage format."""
 
-    def __init__(self, name, weight, bias, mask=None, storage_format="dense", pruned=False):
+    def __init__(self, name, weight, bias, mask=None, storage_format="dense", pruned=False, adapter=None):
         self.name, self.weight, self.bias, self.mask = name, weight, bias, mask
-        self.storage_format, self.pruned = storage_format, pruned
+        self.storage_format, self.pruned, self.adapter = storage_format, pruned, adapter
 
     def to(self, device):
         mask = None if self.mask is None else self.mask.to(device)
+        adapter = None if self.adapter is None else tuple(t.to(device) for t in self.adapter)
         return StoredLayer(self.name, self.weight.to(device), self.bias.to(device), mask,
-                           self.storage_format, self.pruned)
+                           self.storage_format, self.pruned, adapter)
 
     def tensors(self):
         """Every tensor buffer this layer keeps (sparse tensors as their components)."""
@@ -65,6 +72,8 @@ class StoredLayer:
             out = [w]
         if self.mask is not None:
             out.append(self.mask)
+        if self.adapter is not None:
+            out += list(self.adapter)
         return out + [self.bias]
 
     def storage(self):
@@ -89,6 +98,8 @@ class StoredLayer:
                 "weight_bytes": sum(parts.values()), "weight_bytes_breakdown": parts,
                 "value_dtype": str(w.dtype), "index_dtype": index_dtype,
                 "mask_dtype": None if self.mask is None else str(self.mask.dtype),
+                "adapter_rank": None if self.adapter is None else self.adapter[0].shape[0],
+                "adapter_bytes": 0 if self.adapter is None else sum(_nbytes(t) for t in self.adapter),
                 "bias_bytes": _nbytes(self.bias)}
 
 
@@ -110,8 +121,10 @@ class FormatMLP:
 
     def storage(self):
         layers = {layer.name: layer.storage() for layer in self.layers}
-        return {"format": self.storage_format,
-                "weight_bytes": sum(layer["weight_bytes"] for layer in layers.values()),
+        weight_bytes = sum(layer["weight_bytes"] for layer in layers.values())
+        adapter_bytes = sum(layer["adapter_bytes"] for layer in layers.values())
+        return {"format": self.storage_format, "weight_bytes": weight_bytes, "adapter_bytes": adapter_bytes,
+                "stored_bytes": weight_bytes + adapter_bytes,
                 "bias_bytes": sum(layer["bias_bytes"] for layer in layers.values()),
                 "layers": layers}
 
@@ -121,52 +134,67 @@ class FormatMLP:
             h = x
             for i, layer in enumerate(self.layers):
                 weight = layer.weight if layer.mask is None else layer.weight * layer.mask
-                h = F.linear(h, weight, layer.bias)
-                if i < last:
-                    h = torch.relu(h)
+                out = F.linear(h, weight, layer.bias)
+                if layer.adapter is not None:
+                    a, b = layer.adapter
+                    out = out + F.linear(F.linear(h, a), b)
+                h = torch.relu(out) if i < last else out
             return h
         h = x.t()
         for i, layer in enumerate(self.layers):
             if layer.weight.layout == torch.strided:  # a layer that is not pruned stays dense
-                h = torch.addmm(layer.bias[:, None], layer.weight, h)
+                out = torch.addmm(layer.bias[:, None], layer.weight, h)
             else:
-                h = torch.sparse.mm(layer.weight, h) + layer.bias[:, None]
-            if i < last:
-                h = torch.relu(h)
+                out = torch.sparse.mm(layer.weight, h) + layer.bias[:, None]
+            if layer.adapter is not None:
+                a, b = layer.adapter
+                out = out + b @ (a @ h)
+            h = torch.relu(out) if i < last else out
         return h.t()
 
 
-def build_format_model(model, masks, storage_format):
+def build_format_model(model, masks, storage_format, adapters=None):
     """FormatMLP on CPU for `model` (an src/mlp/model.MLP) pruned by `masks`.
 
     masks: {layer name: keep-mask} for the pruned layers ({} = original model,
     dense only). Layers without a mask are stored dense in every format.
+    adapters: optional {layer name: (A, B)} low-rank adapters, kept separate.
     Only the tensors of the requested format are created.
     """
+    adapters = adapters or {}
     if storage_format not in FORMATS:
         raise ValueError(f"unknown format {storage_format!r} (available: {FORMATS})")
     if not masks and storage_format != "dense":
         raise ValueError("the unpruned model is only stored dense")
-    unknown = set(masks) - set(model.layer_names)
+    unknown = (set(masks) | set(adapters)) - set(model.layer_names)
     if unknown:
-        raise ValueError(f"masks for unknown layers {sorted(unknown)}")
+        raise ValueError(f"masks or adapters for unknown layers {sorted(unknown)}")
 
     layers = []
     for name, linear in zip(model.layer_names, model.layers()):
         weight, bias = linear.weight.detach().cpu(), linear.bias.detach().cpu().clone()
+        adapter = adapters.get(name)
+        if adapter is not None:
+            a, b = (t.detach().cpu().clone() for t in adapter)
+            if a.shape[1] != weight.shape[1] or b.shape[0] != weight.shape[0] or a.shape[0] != b.shape[1]:
+                raise ValueError(f"{name}: adapter shapes {tuple(a.shape)}, {tuple(b.shape)} do not fit "
+                                 f"weight {tuple(weight.shape)}")
+            adapter = (a, b)
         mask = masks.get(name)
         if mask is None:
-            layers.append(StoredLayer(name, weight.clone(), bias))
+            layers.append(StoredLayer(name, weight.clone(), bias, adapter=adapter))
             continue
         if mask.shape != weight.shape or mask.dtype != torch.bool:
             raise ValueError(f"{name}: mask must be bool with shape {tuple(weight.shape)}")
         if storage_format == "dense":
-            stored = StoredLayer(name, apply_mask(weight, mask), bias, storage_format="dense", pruned=True)
+            stored = StoredLayer(name, apply_mask(weight, mask), bias, storage_format="dense", pruned=True,
+                                 adapter=adapter)
         elif storage_format == "dense_mask":
-            stored = StoredLayer(name, weight.clone(), bias, mask.clone(), "dense_mask", pruned=True)
+            stored = StoredLayer(name, weight.clone(), bias, mask.clone(), "dense_mask", pruned=True,
+                                 adapter=adapter)
         else:
             sparse = sparse_from_mask(weight, mask)
             stored = StoredLayer(name, sparse if storage_format == "coo" else sparse.to_sparse_csr(), bias,
-                                 storage_format=storage_format, pruned=True)
+                                 storage_format=storage_format, pruned=True, adapter=adapter)
         layers.append(stored)
     return FormatMLP(layers, storage_format)
