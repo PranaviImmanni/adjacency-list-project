@@ -1,0 +1,98 @@
+{
+  "format_version": 1,
+  "tag": "m42_fc3dense_s90",
+  "experiment": "protect_fc3",
+  "kind": "protected",
+  "params": {
+    "matched_to_sparsity": 0.9,
+    "finetune": false
+  },
+  "model_seed": 42,
+  "deploy_formats": [
+    "csr"
+  ],
+  "architecture": {
+    "input_dim": 784,
+    "hidden_dims": [
+      300,
+      100
+    ],
+    "output_dim": 10
+  },
+  "pruning": {
+    "method": "magnitude",
+    "scope": "global",
+    "pruning_seed": null,
+    "requested_sparsity": null,
+    "requested_retained": 26294,
+    "actual_sparsity": 0.9008521870286577,
+    "pruned_weights": 265200,
+    "removed_weights": 238906,
+    "retained_weights": 26294,
+    "layers": {
+      "fc1": {
+        "shape": [
+          300,
+          784
+        ],
+        "numel": 235200,
+        "retained": 22387,
+        "removed": 212813,
+        "actual_sparsity": 0.9048171768707483,
+        "mask_sha256": "61c6c66e4ad76aed"
+      },
+      "fc2": {
+        "shape": [
+          100,
+          300
+        ],
+        "numel": 30000,
+        "retained": 3907,
+        "removed": 26093,
+        "actual_sparsity": 0.8697666666666667,
+        "mask_sha256": "560e9bd69a4f916e"
+      }
+    }
+  },
+  "matching": {
+    "matched_to": "m42_finetune_s90",
+    "protected_layers": [
+      "fc3"
+    ],
+    "target_weight_bytes": 322744,
+    "achieved_weight_bytes": 322744,
+    "mismatch_bytes": 0,
+    "mismatch_fraction": 0.0,
+    "retained_in_pruned_layers": 26294
+  },
+  "recovery": null,
+  "base_checkpoint": {
+    "path": "/data/adjli/adjacency-list-project/checkpoints/fashion_mlp_seed42_cuda1.pt",
+    "sha256": "8f548ba007f65d2a",
+    "dataset": "fashion_mnist",
+    "model_seed": 42,
+    "architecture": [
+      784,
+      300,
+      100,
+      10
+    ],
+    "best_epoch": 27,
+    "best_validation_accuracy": 0.895,
+    "saved_test_accuracy": 0.8887,
+    "train_device": "cuda:1"
+  },
+  "created": "2026-11-21T00:55:41.240753+00:00",
+  "train_device": "cuda:1",
+  "torch_version": "2.14.1+cu130",
+  "model_weights": 266200,
+  "model_retained_weights": 27294,
+  "model_sparsity": 0.8974680691209617,
+  "weights_sha256": "e4e795c229c87cbd",
+  "pruned_layers": [
+    "fc1",
+    "fc2"
+  ],
+  "adapter_layers": [],
+  "adapter_parameters": 0
+}

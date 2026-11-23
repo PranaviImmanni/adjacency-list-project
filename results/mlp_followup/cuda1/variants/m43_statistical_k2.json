@@ -1,0 +1,110 @@
+{
+  "format_version": 1,
+  "tag": "m43_statistical_k2",
+  "experiment": "statistical",
+  "kind": "statistical",
+  "params": {
+    "k": 2
+  },
+  "model_seed": 43,
+  "deploy_formats": [
+    "csr"
+  ],
+  "architecture": {
+    "input_dim": 784,
+    "hidden_dims": [
+      300,
+      100
+    ],
+    "output_dim": 10
+  },
+  "pruning": {
+    "method": "statistical",
+    "scope": "per weight matrix",
+    "pruning_seed": null,
+    "requested_sparsity": null,
+    "k": 2,
+    "std": "population (ddof=0)",
+    "rule": "keep |w - mean| > k * std",
+    "actual_sparsity": 0.9461044327573254,
+    "pruned_weights": 266200,
+    "removed_weights": 251853,
+    "retained_weights": 14347,
+    "layers": {
+      "fc1": {
+        "shape": [
+          300,
+          784
+        ],
+        "numel": 235200,
+        "retained": 12702,
+        "removed": 222498,
+        "actual_sparsity": 0.9459948979591837,
+        "mask_sha256": "13d107068b7bcb5a",
+        "mean": -4.7726502728484705e-06,
+        "std": 0.10261028114732096,
+        "threshold": 0.20522056229464192
+      },
+      "fc2": {
+        "shape": [
+          100,
+          300
+        ],
+        "numel": 30000,
+        "retained": 1595,
+        "removed": 28405,
+        "actual_sparsity": 0.9468333333333333,
+        "mask_sha256": "96693b79b99e03bc",
+        "mean": -0.010454119480306242,
+        "std": 0.1145956552755674,
+        "threshold": 0.2291913105511348
+      },
+      "fc3": {
+        "shape": [
+          10,
+          100
+        ],
+        "numel": 1000,
+        "retained": 50,
+        "removed": 950,
+        "actual_sparsity": 0.95,
+        "mask_sha256": "7a2aa06be1848e55",
+        "mean": -0.05266131768793275,
+        "std": 0.17554879377336755,
+        "threshold": 0.3510975875467351
+      }
+    }
+  },
+  "matching": null,
+  "recovery": null,
+  "base_checkpoint": {
+    "path": "/data/adjli/adjacency-list-project/checkpoints/fashion_mlp_seed43_cuda1.pt",
+    "sha256": "76e8ee9f10532d01",
+    "dataset": "fashion_mnist",
+    "model_seed": 43,
+    "architecture": [
+      784,
+      300,
+      100,
+      10
+    ],
+    "best_epoch": 26,
+    "best_validation_accuracy": 0.8914,
+    "saved_test_accuracy": 0.8915,
+    "train_device": "cuda:1"
+  },
+  "created": "2026-11-21T00:22:25.195566+00:00",
+  "train_device": "cuda:1",
+  "torch_version": "2.14.1+cu130",
+  "model_weights": 266200,
+  "model_retained_weights": 14347,
+  "model_sparsity": 0.9461044327573254,
+  "weights_sha256": "79e32ef9c3b81bc4",
+  "pruned_layers": [
+    "fc1",
+    "fc2",
+    "fc3"
+  ],
+  "adapter_layers": [],
+  "adapter_parameters": 0
+}

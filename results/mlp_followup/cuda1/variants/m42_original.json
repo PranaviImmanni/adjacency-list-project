@@ -1,0 +1,49 @@
+{
+  "format_version": 1,
+  "tag": "m42_original",
+  "experiment": "int8",
+  "kind": "original",
+  "params": {},
+  "model_seed": 42,
+  "deploy_formats": [
+    "int8_weight_only",
+    "int8_w8a8"
+  ],
+  "architecture": {
+    "input_dim": 784,
+    "hidden_dims": [
+      300,
+      100
+    ],
+    "output_dim": 10
+  },
+  "pruning": null,
+  "matching": null,
+  "recovery": null,
+  "base_checkpoint": {
+    "path": "/data/adjli/adjacency-list-project/checkpoints/fashion_mlp_seed42_cuda1.pt",
+    "sha256": "8f548ba007f65d2a",
+    "dataset": "fashion_mnist",
+    "model_seed": 42,
+    "architecture": [
+      784,
+      300,
+      100,
+      10
+    ],
+    "best_epoch": 27,
+    "best_validation_accuracy": 0.895,
+    "saved_test_accuracy": 0.8887,
+    "train_device": "cuda:1"
+  },
+  "created": "2026-11-21T00:57:06.153119+00:00",
+  "train_device": "cuda:1",
+  "torch_version": "2.14.1+cu130",
+  "model_weights": 266200,
+  "model_retained_weights": 266200,
+  "model_sparsity": 0.0,
+  "weights_sha256": "e4e795c229c87cbd",
+  "pruned_layers": [],
+  "adapter_layers": [],
+  "adapter_parameters": 0
+}

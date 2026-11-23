@@ -18,6 +18,7 @@ per-repetition medians; memory per unit is the maximum over repetitions.
 """
 
 import json
+import math
 import statistics
 import textwrap
 from collections import defaultdict
@@ -316,10 +317,17 @@ def accuracy_memory_figure(plt, path, panels, curve, original, has_peak, subtitl
                     _series_plot(ax, [p[idx] for p in pts], [p[2] for p in pts], [p[3] for p in pts],
                                  [p[4] for p in pts], style)
                     if style is SLOTS[0]:
-                        for p in pts:
-                            if p[5]:
-                                ax.annotate(p[5], (p[idx], p[2]), xytext=(6, 5), textcoords="offset points",
-                                            fontsize=7.5, color=INK_SECONDARY)
+                        labeled = sorted((p for p in pts if p[5]), key=lambda p: p[idx])
+                        for i, p in enumerate(labeled):
+                            # Labels sit right of their point; when the next point is too close to fit one,
+                            # this label goes on the left instead so the two do not overlap.
+                            nxt = labeled[i + 1] if i + 1 < len(labeled) else None
+                            crowded = nxt is not None and (
+                                math.log(nxt[idx] / p[idx]) / math.log(x_hi / x_lo) * panel_w * 72 < 30
+                                and abs(nxt[2] - p[2]) * panel_h * 72 < 12)
+                            ax.annotate(p[5], (p[idx], p[2]), xytext=(-6 if crowded else 6, 5),
+                                        textcoords="offset points", ha="right" if crowded else "left",
+                                        fontsize=7.5, color=INK_SECONDARY)
             ax.set_xlabel(xlabel, color=MUTED, fontsize=8, labelpad=5)
             if r == 0:
                 ax.set_title(title, loc="left", fontsize=10, color=INK, pad=title_pad)

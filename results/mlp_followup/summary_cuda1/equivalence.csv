@@ -1,0 +1,21 @@
+Model,Format,Max epsilon (eval),Equivalent,Bitwise,Min agreement,Benchmark batches equivalent,Max epsilon (benchmark)
+"Magnitude 80%, pruning only",CSR,1.1e-05,yes,no,100.00%,yes,7.6e-06
+"Magnitude 90%, pruning only",CSR,7.6e-06,yes,no,100.00%,yes,3.8e-06
+"Statistical, k = 0.5",CSR,1.5e-05,yes,no,100.00%,yes,1.1e-05
+"Magnitude, count of k = 0.5",CSR,2.3e-05,yes,no,100.00%,yes,1.5e-05
+"Statistical, k = 1",CSR,1.1e-05,yes,no,100.00%,yes,7.6e-06
+"Magnitude, count of k = 1",CSR,1.5e-05,yes,no,100.00%,yes,7.6e-06
+"Statistical, k = 1.5",CSR,5.7e-06,yes,no,100.00%,yes,5.7e-06
+"Magnitude, count of k = 1.5",CSR,7.6e-06,yes,no,100.00%,yes,3.8e-06
+"Statistical, k = 2",CSR,2.4e-06,yes,no,100.00%,yes,2.9e-06
+"Magnitude, count of k = 2",CSR,3.8e-06,yes,no,100.00%,yes,2.4e-06
+Magnitude 80% + fine-tune,CSR,1.5e-05,yes,no,100.00%,yes,1.1e-05
+Magnitude 90% + fine-tune,CSR,1.5e-05,yes,no,100.00%,yes,7.6e-06
+"fc3 dense, 80% bytes, pruning only",CSR + dense fc3,9.5e-06,yes,no,100.00%,yes,7.6e-06
+"fc3 dense, 90% bytes, pruning only",CSR + dense fc3,5.7e-06,yes,no,100.00%,yes,3.8e-06
+"fc3 dense, 80% bytes + fine-tune",CSR + dense fc3,1.5e-05,yes,no,100.00%,yes,1.5e-05
+"fc3 dense, 90% bytes + fine-tune",CSR + dense fc3,1.1e-05,yes,no,100.00%,yes,1.1e-05
+Magnitude 80% + LoRA,CSR + adapters,1.9e-05,yes,no,100.00%,yes,1.1e-05
+Magnitude 90% + LoRA,CSR + adapters,1.1e-05,yes,no,100.00%,yes,9.5e-06
+"Original, INT8 weight-only",INT8 weight-only,0.0e+00,yes,yes,100.00%,yes,0.0e+00
+"Original, INT8 W8A8",INT8 W8A8,0.0e+00,yes,yes,100.00%,yes,0.0e+00

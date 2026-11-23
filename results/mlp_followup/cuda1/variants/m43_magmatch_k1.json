@@ -1,0 +1,103 @@
+{
+  "format_version": 1,
+  "tag": "m43_magmatch_k1",
+  "experiment": "statistical",
+  "kind": "magnitude_matched",
+  "params": {
+    "k": 1
+  },
+  "model_seed": 43,
+  "deploy_formats": [
+    "csr"
+  ],
+  "architecture": {
+    "input_dim": 784,
+    "hidden_dims": [
+      300,
+      100
+    ],
+    "output_dim": 10
+  },
+  "pruning": {
+    "method": "magnitude",
+    "scope": "global",
+    "pruning_seed": null,
+    "requested_sparsity": null,
+    "requested_retained": 71516,
+    "actual_sparsity": 0.7313448534936138,
+    "pruned_weights": 266200,
+    "removed_weights": 194684,
+    "retained_weights": 71516,
+    "layers": {
+      "fc1": {
+        "shape": [
+          300,
+          784
+        ],
+        "numel": 235200,
+        "retained": 61315,
+        "removed": 173885,
+        "actual_sparsity": 0.7393069727891156,
+        "mask_sha256": "6088bb0a8de3ecc8"
+      },
+      "fc2": {
+        "shape": [
+          100,
+          300
+        ],
+        "numel": 30000,
+        "retained": 9685,
+        "removed": 20315,
+        "actual_sparsity": 0.6771666666666667,
+        "mask_sha256": "bbd94bb6b7a9b02e"
+      },
+      "fc3": {
+        "shape": [
+          10,
+          100
+        ],
+        "numel": 1000,
+        "retained": 516,
+        "removed": 484,
+        "actual_sparsity": 0.484,
+        "mask_sha256": "503639be720b7819"
+      }
+    }
+  },
+  "matching": {
+    "matched_to": "m43_statistical_k1",
+    "target_retained": 71516,
+    "achieved_retained": 71516
+  },
+  "recovery": null,
+  "base_checkpoint": {
+    "path": "/data/adjli/adjacency-list-project/checkpoints/fashion_mlp_seed43_cuda1.pt",
+    "sha256": "76e8ee9f10532d01",
+    "dataset": "fashion_mnist",
+    "model_seed": 43,
+    "architecture": [
+      784,
+      300,
+      100,
+      10
+    ],
+    "best_epoch": 26,
+    "best_validation_accuracy": 0.8914,
+    "saved_test_accuracy": 0.8915,
+    "train_device": "cuda:1"
+  },
+  "created": "2026-11-21T00:22:25.132570+00:00",
+  "train_device": "cuda:1",
+  "torch_version": "2.14.1+cu130",
+  "model_weights": 266200,
+  "model_retained_weights": 71516,
+  "model_sparsity": 0.7313448534936138,
+  "weights_sha256": "79e32ef9c3b81bc4",
+  "pruned_layers": [
+    "fc1",
+    "fc2",
+    "fc3"
+  ],
+  "adapter_layers": [],
+  "adapter_parameters": 0
+}

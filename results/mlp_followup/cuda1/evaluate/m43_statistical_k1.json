@@ -1,0 +1,358 @@
+{
+  "schema_version": 1,
+  "experiment": "mlp_followup_evaluate",
+  "status": "ok",
+  "timestamp": "2026-11-21T00:22:33.584885+00:00",
+  "device": "cuda:1",
+  "device_type": "cuda",
+  "torch_version": "2.14.1+cu130",
+  "cuda_version": "13.0",
+  "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.39",
+  "device_name": "NVIDIA GeForce RTX 3090",
+  "tf32_requested": false,
+  "fp32_precision_applied": "ieee",
+  "dtype": "float32",
+  "eval_batch_size": 256,
+  "eval_set": {
+    "val": 5000,
+    "test": 10000
+  },
+  "variant": {
+    "format_version": 1,
+    "tag": "m43_statistical_k1",
+    "experiment": "statistical",
+    "kind": "statistical",
+    "params": {
+      "k": 1
+    },
+    "model_seed": 43,
+    "deploy_formats": [
+      "csr"
+    ],
+    "architecture": {
+      "input_dim": 784,
+      "hidden_dims": [
+        300,
+        100
+      ],
+      "output_dim": 10
+    },
+    "pruning": {
+      "method": "statistical",
+      "scope": "per weight matrix",
+      "pruning_seed": null,
+      "requested_sparsity": null,
+      "k": 1,
+      "std": "population (ddof=0)",
+      "rule": "keep |w - mean| > k * std",
+      "actual_sparsity": 0.7313448534936138,
+      "pruned_weights": 266200,
+      "removed_weights": 194684,
+      "retained_weights": 71516,
+      "layers": {
+        "fc1": {
+          "shape": [
+            300,
+            784
+          ],
+          "numel": 235200,
+          "retained": 62751,
+          "removed": 172449,
+          "actual_sparsity": 0.7332015306122449,
+          "mask_sha256": "2199ac9ac9dfd274",
+          "mean": -4.7726502728484705e-06,
+          "std": 0.10261028114732096,
+          "threshold": 0.10261028114732096
+        },
+        "fc2": {
+          "shape": [
+            100,
+            300
+          ],
+          "numel": 30000,
+          "retained": 8480,
+          "removed": 21520,
+          "actual_sparsity": 0.7173333333333334,
+          "mask_sha256": "c18300f8c4e6d506",
+          "mean": -0.010454119480306242,
+          "std": 0.1145956552755674,
+          "threshold": 0.1145956552755674
+        },
+        "fc3": {
+          "shape": [
+            10,
+            100
+          ],
+          "numel": 1000,
+          "retained": 285,
+          "removed": 715,
+          "actual_sparsity": 0.715,
+          "mask_sha256": "df01b9fa546a3033",
+          "mean": -0.05266131768793275,
+          "std": 0.17554879377336755,
+          "threshold": 0.17554879377336755
+        }
+      }
+    },
+    "matching": null,
+    "recovery": null,
+    "base_checkpoint": {
+      "path": "/data/adjli/adjacency-list-project/checkpoints/fashion_mlp_seed43_cuda1.pt",
+      "sha256": "76e8ee9f10532d01",
+      "dataset": "fashion_mnist",
+      "model_seed": 43,
+      "architecture": [
+        784,
+        300,
+        100,
+        10
+      ],
+      "best_epoch": 26,
+      "best_validation_accuracy": 0.8914,
+      "saved_test_accuracy": 0.8915,
+      "train_device": "cuda:1"
+    },
+    "created": "2026-11-21T00:22:25.081270+00:00",
+    "train_device": "cuda:1",
+    "torch_version": "2.14.1+cu130",
+    "model_weights": 266200,
+    "model_retained_weights": 71516,
+    "model_sparsity": 0.7313448534936138,
+    "weights_sha256": "79e32ef9c3b81bc4",
+    "pruned_layers": [
+      "fc1",
+      "fc2",
+      "fc3"
+    ],
+    "adapter_layers": [],
+    "adapter_parameters": 0
+  },
+  "original_accuracy": {
+    "val": 0.8914,
+    "test": 0.8915
+  },
+  "original_sweep": null,
+  "formats": {
+    "csr": {
+      "accuracy": {
+        "val": 0.7352,
+        "test": 0.7399
+      },
+      "reference_format": "dense",
+      "reference_accuracy": {
+        "val": 0.7352,
+        "test": 0.7399
+      },
+      "check": {
+        "test_accuracy": 0.7398999929428101,
+        "reference_test_accuracy": 0.7398999929428101,
+        "accuracy_difference_pp": 0.0,
+        "prediction_agreement_test": 1.0,
+        "prediction_agreement_all": 1.0,
+        "mean_abs_logit_diff": 8.349859341979026e-07,
+        "max_abs_logit_diff": 1.1444091796875e-05,
+        "allclose": true,
+        "atol": 1e-05,
+        "rtol": 0.0001,
+        "epsilon_logit": 1.1444091796875e-05,
+        "abs_accuracy_difference_pp": 0.0,
+        "margin": {
+          "all": {
+            "nodes": 15000,
+            "margin_condition_fraction": 1.0,
+            "disagreement_rate": 0.0,
+            "disagreements": 0,
+            "disagreements_satisfying_condition": 0,
+            "median_margin": 3.515896737575531,
+            "max_node_epsilon": 1.1444091796875e-05
+          },
+          "test": {
+            "nodes": 10000,
+            "margin_condition_fraction": 1.0,
+            "disagreement_rate": 0.0,
+            "disagreements": 0,
+            "disagreements_satisfying_condition": 0,
+            "median_margin": 3.580976366996765,
+            "max_node_epsilon": 1.1444091796875e-05
+          }
+        },
+        "equivalent": true,
+        "bitwise_equal": false,
+        "reference": "dense on cuda:1"
+      },
+      "storage": {
+        "format": "csr",
+        "weight_bytes": 861496,
+        "adapter_bytes": 0,
+        "stored_bytes": 861496,
+        "bias_bytes": 1640,
+        "layers": {
+          "fc1": {
+            "format": "csr",
+            "pruned": true,
+            "shape": [
+              300,
+              784
+            ],
+            "stored_values": 62751,
+            "weight_bytes": 755420,
+            "weight_bytes_breakdown": {
+              "values": 251004,
+              "col_indices": 502008,
+              "crow_indices": 2408
+            },
+            "value_dtype": "torch.float32",
+            "index_dtype": "torch.int64",
+            "mask_dtype": null,
+            "adapter_rank": null,
+            "adapter_bytes": 0,
+            "bias_bytes": 1200
+          },
+          "fc2": {
+            "format": "csr",
+            "pruned": true,
+            "shape": [
+              100,
+              300
+            ],
+            "stored_values": 8480,
+            "weight_bytes": 102568,
+            "weight_bytes_breakdown": {
+              "values": 33920,
+              "col_indices": 67840,
+              "crow_indices": 808
+            },
+            "value_dtype": "torch.float32",
+            "index_dtype": "torch.int64",
+            "mask_dtype": null,
+            "adapter_rank": null,
+            "adapter_bytes": 0,
+            "bias_bytes": 400
+          },
+          "fc3": {
+            "format": "csr",
+            "pruned": true,
+            "shape": [
+              10,
+              100
+            ],
+            "stored_values": 285,
+            "weight_bytes": 3508,
+            "weight_bytes_breakdown": {
+              "values": 1140,
+              "col_indices": 2280,
+              "crow_indices": 88
+            },
+            "value_dtype": "torch.float32",
+            "index_dtype": "torch.int64",
+            "mask_dtype": null,
+            "adapter_rank": null,
+            "adapter_bytes": 0,
+            "bias_bytes": 40
+          }
+        }
+      },
+      "reference_storage": {
+        "format": "dense",
+        "weight_bytes": 1064800,
+        "adapter_bytes": 0,
+        "stored_bytes": 1064800,
+        "bias_bytes": 1640,
+        "layers": {
+          "fc1": {
+            "format": "dense",
+            "pruned": true,
+            "shape": [
+              300,
+              784
+            ],
+            "stored_values": 235200,
+            "weight_bytes": 940800,
+            "weight_bytes_breakdown": {
+              "values": 940800
+            },
+            "value_dtype": "torch.float32",
+            "index_dtype": null,
+            "mask_dtype": null,
+            "adapter_rank": null,
+            "adapter_bytes": 0,
+            "bias_bytes": 1200
+          },
+          "fc2": {
+            "format": "dense",
+            "pruned": true,
+            "shape": [
+              100,
+              300
+            ],
+            "stored_values": 30000,
+            "weight_bytes": 120000,
+            "weight_bytes_breakdown": {
+              "values": 120000
+            },
+            "value_dtype": "torch.float32",
+            "index_dtype": null,
+            "mask_dtype": null,
+            "adapter_rank": null,
+            "adapter_bytes": 0,
+            "bias_bytes": 400
+          },
+          "fc3": {
+            "format": "dense",
+            "pruned": true,
+            "shape": [
+              10,
+              100
+            ],
+            "stored_values": 1000,
+            "weight_bytes": 4000,
+            "weight_bytes_breakdown": {
+              "values": 4000
+            },
+            "value_dtype": "torch.float32",
+            "index_dtype": null,
+            "mask_dtype": null,
+            "adapter_rank": null,
+            "adapter_bytes": 0,
+            "bias_bytes": 40
+          }
+        }
+      },
+      "effect_vs_original": {
+        "original_val_accuracy": 0.8914,
+        "val_accuracy": 0.7352,
+        "val_accuracy_loss_pp": 15.620000000000001,
+        "original_test_accuracy": 0.8915,
+        "test_accuracy": 0.7399,
+        "test_accuracy_loss_pp": 15.159999999999997,
+        "prediction_disagreement_all": 0.23573333333333332,
+        "prediction_disagreement_test": 0.2337,
+        "mean_abs_logit_diff": 5.477864564159506,
+        "epsilon_logit": 41.71154594421387,
+        "margin": {
+          "all": {
+            "nodes": 15000,
+            "margin_condition_fraction": 0.12733333333333333,
+            "disagreement_rate": 0.23573333333333332,
+            "disagreements": 3536,
+            "disagreements_satisfying_condition": 0,
+            "median_margin": 9.824926018714905,
+            "max_node_epsilon": 41.71154594421387
+          },
+          "test": {
+            "nodes": 10000,
+            "margin_condition_fraction": 0.1287,
+            "disagreement_rate": 0.2337,
+            "disagreements": 2337,
+            "disagreements_satisfying_condition": 0,
+            "median_margin": 9.855502009391785,
+            "max_node_epsilon": 38.29004669189453
+          }
+        }
+      },
+      "int_mm_support": null,
+      "logits_sha256": "13b9a979c74f9ff0"
+    }
+  },
+  "all_formats_equivalent": true
+}

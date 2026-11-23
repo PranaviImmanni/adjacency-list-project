@@ -1,0 +1,319 @@
+{
+  "schema_version": 1,
+  "status": "ok",
+  "experiment": "mlp_followup_benchmark",
+  "timestamp": "2026-11-21T00:15:02.517693+00:00",
+  "dataset": "fashion_mnist",
+  "tag": "m42_magmatch_k1p5",
+  "followup_experiment": "statistical",
+  "kind": "magnitude_matched",
+  "params": {
+    "k": 1.5
+  },
+  "model_seed": 42,
+  "model_sparsity": 0.8772126220886551,
+  "model_retained_weights": 32686,
+  "format": "csr",
+  "batch_size": 32,
+  "repetition": 2,
+  "device": "cuda:1",
+  "device_type": "cuda",
+  "torch_version": "2.14.1+cu130",
+  "cuda_version": "13.0",
+  "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.39",
+  "device_name": "NVIDIA GeForce RTX 3090",
+  "latency_is_debug_only": false,
+  "note": "CUDA run.",
+  "dtype": "float32",
+  "tf32_requested": false,
+  "fp32_precision_applied": "ieee",
+  "storage": {
+    "format": "csr",
+    "weight_bytes": 395536,
+    "adapter_bytes": 0,
+    "stored_bytes": 395536,
+    "bias_bytes": 1640,
+    "layers": {
+      "fc1": {
+        "format": "csr",
+        "pruned": true,
+        "shape": [
+          300,
+          784
+        ],
+        "stored_values": 27652,
+        "weight_bytes": 334232,
+        "weight_bytes_breakdown": {
+          "values": 110608,
+          "col_indices": 221216,
+          "crow_indices": 2408
+        },
+        "value_dtype": "torch.float32",
+        "index_dtype": "torch.int64",
+        "mask_dtype": null,
+        "adapter_rank": null,
+        "adapter_bytes": 0,
+        "bias_bytes": 1200
+      },
+      "fc2": {
+        "format": "csr",
+        "pruned": true,
+        "shape": [
+          100,
+          300
+        ],
+        "stored_values": 4726,
+        "weight_bytes": 57520,
+        "weight_bytes_breakdown": {
+          "values": 18904,
+          "col_indices": 37808,
+          "crow_indices": 808
+        },
+        "value_dtype": "torch.float32",
+        "index_dtype": "torch.int64",
+        "mask_dtype": null,
+        "adapter_rank": null,
+        "adapter_bytes": 0,
+        "bias_bytes": 400
+      },
+      "fc3": {
+        "format": "csr",
+        "pruned": true,
+        "shape": [
+          10,
+          100
+        ],
+        "stored_values": 308,
+        "weight_bytes": 3784,
+        "weight_bytes_breakdown": {
+          "values": 1232,
+          "col_indices": 2464,
+          "crow_indices": 88
+        },
+        "value_dtype": "torch.float32",
+        "index_dtype": "torch.int64",
+        "mask_dtype": null,
+        "adapter_rank": null,
+        "adapter_bytes": 0,
+        "bias_bytes": 40
+      }
+    }
+  },
+  "weight_storage_bytes": 395536,
+  "adapter_bytes": 0,
+  "stored_bytes": 395536,
+  "bias_bytes": 1640,
+  "resident_tensor_bytes": 497528,
+  "timing_ms": {
+    "format_build_ms": 7.22786202095449,
+    "transfer_ms": 129.96871303766966
+  },
+  "warmup_runs": 20,
+  "measured_runs": 50,
+  "latency_ms": {
+    "mean": 0.2736977720633149,
+    "median": 0.271171098574996,
+    "std": 0.005734734443797284,
+    "min": 0.26622205041348934,
+    "max": 0.2857609651982784
+  },
+  "latency_samples_ms": [
+    0.2847108989953995,
+    0.2785909455269575,
+    0.27630082331597805,
+    0.2698521129786968,
+    0.2857609651982784,
+    0.27314084582030773,
+    0.27224188670516014,
+    0.268690986558795,
+    0.28498098254203796,
+    0.2730321139097214,
+    0.2709808759391308,
+    0.2798209898173809,
+    0.27114199474453926,
+    0.2711911220103502,
+    0.27025211602449417,
+    0.2802510280162096,
+    0.2703010104596615,
+    0.26836199685931206,
+    0.27991109527647495,
+    0.2705720253288746,
+    0.27220090851187706,
+    0.26748189702630043,
+    0.2844310365617275,
+    0.26775081641972065,
+    0.2730819396674633,
+    0.2703908830881119,
+    0.28210110031068325,
+    0.2687419764697552,
+    0.27115107513964176,
+    0.2764409873634577,
+    0.27151196263730526,
+    0.26692100800573826,
+    0.2707419916987419,
+    0.2799511421471834,
+    0.2694521099328995,
+    0.2690909896045923,
+    0.27038203552365303,
+    0.2798608038574457,
+    0.26888097636401653,
+    0.26777200400829315,
+    0.280710868537426,
+    0.2724509686231613,
+    0.2691920381039381,
+    0.26622205041348934,
+    0.2806810662150383,
+    0.2682809717953205,
+    0.2805311232805252,
+    0.2672120463103056,
+    0.28211111202836037,
+    0.2690718974918127
+  ],
+  "peak_reset": "after warm-up, before the measured passes",
+  "cuda_allocated_before_inference_bytes": 500736,
+  "cuda_peak_allocated_bytes": 606720,
+  "cuda_peak_reserved_bytes": 2097152,
+  "int_mm_support": null,
+  "energy_joules": null,
+  "format_check": {
+    "test_accuracy": 0.78125,
+    "reference_test_accuracy": 0.78125,
+    "accuracy_difference_pp": 0.0,
+    "prediction_agreement_test": 1.0,
+    "prediction_agreement_all": 1.0,
+    "mean_abs_logit_diff": 5.018140655010939e-07,
+    "max_abs_logit_diff": 1.9073486328125e-06,
+    "allclose": true,
+    "atol": 1e-05,
+    "rtol": 0.0001,
+    "epsilon_logit": 1.9073486328125e-06,
+    "abs_accuracy_difference_pp": 0.0,
+    "margin": {
+      "all": {
+        "nodes": 32,
+        "margin_condition_fraction": 1.0,
+        "disagreement_rate": 0.0,
+        "disagreements": 0,
+        "disagreements_satisfying_condition": 0,
+        "median_margin": 2.0565521121025085,
+        "max_node_epsilon": 1.9073486328125e-06
+      },
+      "test": {
+        "nodes": 32,
+        "margin_condition_fraction": 1.0,
+        "disagreement_rate": 0.0,
+        "disagreements": 0,
+        "disagreements_satisfying_condition": 0,
+        "median_margin": 2.0565521121025085,
+        "max_node_epsilon": 1.9073486328125e-06
+      }
+    },
+    "equivalent": true,
+    "bitwise_equal": false,
+    "reference": "dense on cuda:1, same batch"
+  },
+  "logits_sha256": "7a0c34e97420530b",
+  "variant": {
+    "format_version": 1,
+    "tag": "m42_magmatch_k1p5",
+    "experiment": "statistical",
+    "kind": "magnitude_matched",
+    "params": {
+      "k": 1.5
+    },
+    "model_seed": 42,
+    "deploy_formats": [
+      "csr"
+    ],
+    "architecture": {
+      "input_dim": 784,
+      "hidden_dims": [
+        300,
+        100
+      ],
+      "output_dim": 10
+    },
+    "pruning": {
+      "method": "magnitude",
+      "scope": "global",
+      "pruning_seed": null,
+      "requested_sparsity": null,
+      "requested_retained": 32686,
+      "actual_sparsity": 0.8772126220886551,
+      "pruned_weights": 266200,
+      "removed_weights": 233514,
+      "retained_weights": 32686,
+      "layers": {
+        "fc1": {
+          "shape": [
+            300,
+            784
+          ],
+          "numel": 235200,
+          "retained": 27652,
+          "removed": 207548,
+          "actual_sparsity": 0.8824319727891157,
+          "mask_sha256": "035864d1bb40a8fd"
+        },
+        "fc2": {
+          "shape": [
+            100,
+            300
+          ],
+          "numel": 30000,
+          "retained": 4726,
+          "removed": 25274,
+          "actual_sparsity": 0.8424666666666667,
+          "mask_sha256": "8a90e8937813a282"
+        },
+        "fc3": {
+          "shape": [
+            10,
+            100
+          ],
+          "numel": 1000,
+          "retained": 308,
+          "removed": 692,
+          "actual_sparsity": 0.692,
+          "mask_sha256": "c0a2b975573eca2a"
+        }
+      }
+    },
+    "matching": {
+      "matched_to": "m42_statistical_k1p5",
+      "target_retained": 32686,
+      "achieved_retained": 32686
+    },
+    "recovery": null,
+    "base_checkpoint": {
+      "path": "/data/adjli/adjacency-list-project/checkpoints/fashion_mlp_seed42_cuda1.pt",
+      "sha256": "8f548ba007f65d2a",
+      "dataset": "fashion_mnist",
+      "model_seed": 42,
+      "architecture": [
+        784,
+        300,
+        100,
+        10
+      ],
+      "best_epoch": 27,
+      "best_validation_accuracy": 0.895,
+      "saved_test_accuracy": 0.8887,
+      "train_device": "cuda:1"
+    },
+    "created": "2026-11-21T00:10:27.310998+00:00",
+    "train_device": "cuda:1",
+    "torch_version": "2.14.1+cu130",
+    "model_weights": 266200,
+    "model_retained_weights": 32686,
+    "model_sparsity": 0.8772126220886551,
+    "weights_sha256": "e4e795c229c87cbd",
+    "pruned_layers": [
+      "fc1",
+      "fc2",
+      "fc3"
+    ],
+    "adapter_layers": [],
+    "adapter_parameters": 0
+  }
+}
