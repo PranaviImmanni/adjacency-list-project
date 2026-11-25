@@ -6,7 +6,6 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{microtype}
-\usepackage{xcolor}
 
 \title{From Pruned Weight Matrices to Sparse Graphs:\\
 An Empirical Comparison of Neural-Network Storage Formats}
@@ -14,8 +13,6 @@ An Empirical Comparison of Neural-Network Storage Formats}
 CS 180 Individual Study\\
 San Jos\'e State University}
 \date{November 2026}
-
-\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
 
 \begin{document}
 \maketitle
@@ -33,8 +30,15 @@ and energy when a reliable energy measurement is available.  We also define a
 lossless conversion from rectangular weight matrices to weighted bipartite
 adjacency lists.  The current analytical storage results show that CSR is
 substantially smaller than dense storage at high sparsity, while the runtime
-and energy conclusions require representation-level benchmarks.  \todo{Add
-final adjacency-list, latency, memory, and energy results before submission.}
+and energy conclusions depend on the execution platform.  In our CPU
+reference benchmark, adjacency-list outputs matched pruned dense outputs for
+all tested conditions, but the Python adjacency-list implementation was slower
+than dense NumPy execution.  Energy was not measured because no reliable power
+instrumentation was available.  We additionally study a statistical graph
+construction rule that retains edges above a layer-wise mean-plus-standard-
+deviation threshold.  Across three trained seeds, this rule produced a
+continuous accuracy--sparsity trade-off, but prune-only accuracy declined
+substantially at the most aggressive thresholds.
 \end{abstract}
 
 \section{Introduction}
@@ -67,6 +71,8 @@ The contributions of this study are:
     pruning with deterministic masks;
     \item a lossless conversion of rectangular weight matrices into weighted
     bipartite adjacency lists;
+    \item a statistical graph-construction rule based on layer-wise weight
+    distributions and signed edge types;
     \item a controlled comparison of dense, dense-plus-mask, COO, CSR, and
     adjacency-list representations using identical retained weights;
     \item correctness and output-equivalence tests for the sparse forward
@@ -189,6 +195,8 @@ that adjacency lists replace optimized sparse GPU kernels in every regime.
     \item[RQ4:] Do analytical storage savings appear in actual memory usage?
     \item[RQ5:] What energy differences can be measured on the available
     hardware without relying on estimates?
+    \item[RQ6:] How does a layer-wise mean-plus-standard-deviation rule trade
+    off retained edges and prune-only accuracy across trained model seeds?
 \end{description}
 
 \section{Methodology}
@@ -197,10 +205,13 @@ that adjacency lists replace optimized sparse GPU kernels in every regime.
 
 The primary model is a fully connected Fashion-MNIST classifier with layer
 dimensions $784\rightarrow300\rightarrow100\rightarrow10$, commonly called
-LeNet-300-100.  ReLU activations occur between linear layers.  The current
-baseline artifacts report a test accuracy of 0.8887 for one trained model.
-\todo{Document all three model seeds, dataset preprocessing, and checkpoint
-identifiers in the final version.}
+LeNet-300-100.  ReLU activations occur between linear layers.  The baseline
+artifacts report test accuracies for model seeds 42, 43, and 44; the seed-42
+baseline test accuracy is 0.8887.  Training uses 30 epochs, batch size 128,
+learning rate 0.001, no weight decay, and training-split normalization with
+mean 0.2859255 and standard deviation 0.3529135.  The committed checkpoints
+and exported NumPy bundle identify the exact parameters used for the format
+experiments.
 
 \subsection{Pruning conditions}
 
@@ -214,6 +225,43 @@ layers.  Top-k pruning removes
 $\lfloor s d_{\mathrm{in}}\rfloor$ entries from every output row of width
 $d_{\mathrm{in}}$.  Random pruning uses a fixed seed and a global permutation.
 Ties use deterministic layer and row-major ordering.
+
+\subsection{Statistical network construction}
+
+The primary graph-construction experiment treats each trained linear layer as
+a weighted directed network.  For layer $l$, we calculate statistics on the
+magnitudes of its trained weights:
+\[
+    \mu_l = \operatorname{mean}(|W_l|), \qquad
+    \sigma_l = \operatorname{std}(|W_l|).
+\]
+For a parameter $r$, an edge is retained when
+\[
+    |W_{l,ij}| > \mu_l + r\sigma_l.
+\]
+We evaluate $r\in\{0,0.5,1,1.5,2\}$.  Statistics are computed separately per
+layer to avoid allowing the scale of the largest layer to determine the
+connectivity of every layer.  Retained edges are typed as positive or negative
+according to the sign of their original weight; the signed value itself is
+preserved in the adjacency list.  The test set is used only for evaluation,
+not for calculating thresholds.
+
+\subsection{Low-rank factor networks}
+
+As a separate experiment, we replace each original weight matrix with a
+truncated singular-value decomposition,
+\[
+    W_l \approx B_l A_l,
+    \qquad B_l=U_{l,r}\Sigma_{l,r},\quad A_l=V_{l,r}^{\mathsf T}.
+\]
+The rows of both $B_l$ and $A_l$ are converted into weighted adjacency lists,
+so a forward pass uses the graph for $A_l$ followed by the graph for $B_l$.
+This is distinct from LoRA: LoRA keeps the original matrix and adds a trained
+low-rank update, whereas this experiment replaces the matrix with its
+factorized approximation.  We evaluate ranks $r\in\{4,8,16,32,64\}$.  In
+addition to retaining every factor entry, we test a factor-level rule that
+retains entries satisfying
+$|f|>\operatorname{mean}(|F|)+k\operatorname{std}(|F|)$, with $k=0$.
 
 \subsection{Representations}
 
@@ -285,18 +333,156 @@ These values are structural accounting, not measurements of the full Python
 object graph or process peak memory.  The generated comparison file is
 `reports/cost_model_vs_measured.csv`.
 
+\subsection{Statistical graph-construction results}
+
+The mean-plus-standard-deviation rule was evaluated on the three trained model
+seeds.  Results below are mean $\pm$ standard deviation across seeds.  Accuracy
+is prune-only accuracy on the 10,000-example test set, and latency is the
+median CPU time for a batch of 32 examples using the Python adjacency-list
+implementation.
+
+\begin{table}[ht]
+\centering
+\caption{Statistical graph construction across model seeds 42, 43, and 44.}
+\label{tab:statistical}
+\small
+\begin{tabular}{rrrrr}
+\toprule
+$r$ & Sparsity & Accuracy & Match to dense & List latency (ms) \\
+\midrule
+0.0 & $61.10\%\pm0.06\%$ & $83.43\%\pm2.07\%$ & $87.45\%\pm2.33\%$ & $139.55\pm9.04$ \\
+0.5 & $76.32\%\pm0.16\%$ & $68.95\%\pm2.48\%$ & $70.77\%\pm2.88\%$ & $52.35\pm0.64$ \\
+1.0 & $85.91\%\pm0.16\%$ & $49.96\%\pm3.72\%$ & $50.35\%\pm4.02\%$ & $38.17\pm0.19$ \\
+1.5 & $91.77\%\pm0.09\%$ & $33.79\%\pm1.87\%$ & $33.87\%\pm1.67\%$ & $29.25\pm0.33$ \\
+2.0 & $95.26\%\pm0.03\%$ & $23.87\%\pm4.79\%$ & $23.90\%\pm4.94\%$ & $23.13\pm0.07$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The dense baseline accuracy averaged $88.99\%$ across the three seeds.  The
+statistical rule therefore provides a predictable sparsity control, but its
+prune-only accuracy degrades as $r$ increases.  This result motivates a future
+fine-tuning experiment rather than supporting a claim that statistical
+thresholding preserves accuracy without retraining.  The raw measurements are
+stored in `reports/statistical_graph_conversion.csv`.
+
+\subsection{Edge-type ablation}
+
+To test whether the sign of a connection is useful as an edge type, we also
+evaluated three policies: retain both signs using the magnitude threshold,
+retain only positive edges using statistics of positive magnitudes, and retain
+only negative edges using statistics of negative magnitudes.  At $r=0$, the
+three-seed results were:
+
+\begin{table}[ht]
+\centering
+\caption{Edge-type ablation at $r=0$. Values are mean $\pm$ standard deviation
+across seeds 42, 43, and 44.}
+\label{tab:edgeablation}
+\small
+\begin{tabular}{lrrr}
+\toprule
+Edge policy & Sparsity & Accuracy & Positive / negative edges \\
+\midrule
+Both signs & $61.10\%\pm0.06\%$ & $83.43\%\pm2.07\%$ & $50,517 / 53,034$ \\
+Positive only & $80.08\%\pm0.02\%$ & $17.08\%\pm3.46\%$ & $53,038 / 0$ \\
+Negative only & $80.90\%\pm0.07\%$ & $11.15\%\pm2.01\%$ & $0 / 50,831$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+For this model, retaining both signs is substantially more accurate than
+keeping either sign alone.  This supports treating sign as metadata or an edge
+type while retaining both positive and negative connections, rather than
+discarding one sign by default.  The complete ablation is stored in
+`reports/statistical_edge_type_ablation.csv`.
+
+\subsection{Low-rank adjacency results}
+
+The low-rank experiment was run on the three exported model seeds.  Values are
+means across seeds; storage uses FP32 values and 64-bit indices, including a
+row-pointer array for each factor.  Latencies are CPU measurements from the
+Python adjacency-list implementation and should be treated as an exploratory
+reference measurement.
+
+\begin{table}[ht]
+\centering
+\caption{Low-rank factor adjacency lists across model seeds.}
+\label{tab:lowrank}
+\small
+\begin{tabular}{rrrrrrr}
+\toprule
+Rank & Factor rule & Accuracy & Match & Factor sparsity & Storage / dense & Latency (ms) \\
+\midrule
+4  & all entries & 11.28\% & 10.86\% & 0.0\%  & 7.5\%  & 27.5 \\
+8  & all entries & 30.98\% & 31.90\% & 0.0\%  & 14.7\% & 33.4 \\
+16 & all entries & 66.66\% & 69.03\% & 0.0\%  & 28.3\% & 48.5 \\
+32 & all entries & 85.89\% & 91.12\% & 0.0\%  & 55.1\% & 72.4 \\
+64 & all entries & 88.30\% & 95.81\% & 0.0\%  & 108.7\% & 127.5 \\
+\midrule
+4  & mean+0 std & 9.90\%  & 9.46\%  & 59.5\% & 3.2\%  & 20.9 \\
+8  & mean+0 std & 33.18\% & 33.80\% & 59.3\% & 6.2\%  & 25.7 \\
+16 & mean+0 std & 56.54\% & 57.61\% & 59.6\% & 11.7\% & 31.4 \\
+32 & mean+0 std & 67.02\% & 68.80\% & 59.8\% & 22.4\% & 43.3 \\
+64 & mean+0 std & 69.22\% & 71.37\% & 60.0\% & 43.5\% & 65.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The unthresholded rank-64 factorization nearly recovered the dense baseline
+accuracy ($88.30\%$ versus $88.99\%$) but exceeded dense storage once index
+and row-pointer costs were included.  Lower ranks saved storage but caused
+large accuracy losses.  Thresholding the factors reduced storage further but
+also reduced accuracy at every rank in this pilot.  Thus, low-rank factor
+adjacency lists are a useful representation for studying the graph structure
+of a factorization, but this implementation does not yet demonstrate an
+accuracy-preserving sparse representation.  The raw measurements are stored
+in \texttt{reports/low_rank_adjacency.csv}.
+
 \subsection{Prediction preservation}
 
 The conversion and list-matvec tests pass for rectangular matrices, negative
 weights, empty rows, symmetric bipartite graphs, and three-layer MLP forward
-propagation.  The format-level Fashion-MNIST results are included in the
-project's benchmark artifacts.  \todo{Add the final table of test accuracy,
-prediction agreement, and maximum output error.}
+propagation.  We additionally evaluated the exported seed-42 model on all
+10,000 Fashion-MNIST test examples.  At 90\% requested sparsity and batch size
+32, every adjacency-list condition matched its pruned dense counterpart on
+all predictions, with maximum output differences below $1.1\times10^{-14}$.
+
+\begin{table}[ht]
+\centering
+\caption{Seed-42 CPU adjacency-list results at 90\% sparsity and batch size
+32. Accuracy uses all 10,000 test examples; latency uses 512 examples.}
+\label{tab:adjacency90}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Method & NNZ & Accuracy & Dense ms & List ms & Match \\
+\midrule
+Magnitude & 26,620 & 55.10\% & 13.00 & 35.69 & 100\% \\
+Top-k per neuron & 26,800 & 34.16\% & 16.75 & 42.22 & 100\% \\
+Random (seed 101) & 26,620 & 10.52\% & 12.20 & 35.65 & 100\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The accuracy values are for pruning without retraining.  They measure pruning
+damage rather than the best accuracy attainable after fine-tuning.
 
 \subsection{Latency, memory, and energy}
 
-\todo{Add benchmark tables and plots after the adjacency-list experiment is
-run using the same trained checkpoint and test set as the existing formats.}
+The CPU reference benchmark measured pruned dense and adjacency-list execution
+from the same exported weights.  At 90\% magnitude sparsity, the adjacency-list
+implementation took 35.69 ms per timed batch versus 13.00 ms for pruned dense
+execution at batch size 32.  Thus, the current Python list implementation was
+approximately 2.75 times slower despite using fewer stored values.
+
+The benchmark is recorded in
+`reports/adjacency_list_mlp_benchmark.csv`.  These CPU measurements are not
+directly comparable to the existing CUDA measurements in Minh's artifacts.
+The statistical benchmark also records peak allocations observed by
+`tracemalloc` during the Python timing region.  These values describe traced
+Python allocations, not total resident process memory or GPU allocation.
+Energy remains unavailable and is not estimated.
 
 \section{Discussion}
 
@@ -309,8 +495,20 @@ launch, and Python-object overheads, especially for small matrices or small
 batches.  The benchmark therefore treats storage and execution as separate
 questions.
 
-\todo{Discuss the measured crossover points, batch-size effects, and the
-difference between Python adjacency lists and compiled sparse kernels.}
+The results show a clear representation trade-off.  At fixed sparsity, the
+adjacency list preserved the pruned dense computation but incurred Python
+iteration and indexing overhead.  Increasing sparsity reduced adjacency-list
+latency in the tested seed-42 runs, but it did not make the reference list
+implementation faster than dense NumPy execution at the reported batch sizes.
+This result should not be generalized to optimized CSR, COO, or GPU kernels:
+the adjacency list is a transparent graph reference implementation, not a
+specialized sparse kernel.  The statistical experiment adds a second trade-off:
+raising $r$ reduces the number of edges and lowers list latency, but also
+removes increasingly important connections and reduces prune-only accuracy.
+The low-rank pilot adds a related storage--accuracy curve: rank 64 nearly
+recovers dense accuracy, but its factor adjacency representation is larger
+than dense under the tested index accounting, while thresholding the factors
+reduces accuracy substantially.
 
 \section{Limitations}
 
@@ -327,8 +525,13 @@ This paper establishes a controlled framework for converting pruned neural
 network weight matrices into sparse graph representations and comparing them
 with standard sparse formats.  The current storage analysis shows substantial
 CSR savings at high sparsity while preserving the dense model's parameter
-values in the sparse representations.  \todo{Replace this preliminary
-conclusion with the final latency, memory, energy, and adjacency-list findings.}
+values in the sparse representations.  The adjacency-list benchmark confirms
+numerical and prediction equivalence, but its Python implementation is slower
+than pruned dense CPU execution.  The new statistical graph experiment shows
+that layer-wise mean-plus-standard-deviation thresholding can control graph
+density, although prune-only accuracy falls as the threshold becomes more
+aggressive.  Fine-tuning, hardware energy measurements, optimized graph
+kernels, and a fine-tuned low-rank factor model remain future work.
 
 \bibliographystyle{plain}
 \bibliography{references}
