@@ -246,6 +246,23 @@ according to the sign of their original weight; the signed value itself is
 preserved in the adjacency list.  The test set is used only for evaluation,
 not for calculating thresholds.
 
+\subsection{Low-rank factor networks}
+
+As a separate experiment, we replace each original weight matrix with a
+truncated singular-value decomposition,
+\[
+    W_l \approx B_l A_l,
+    \qquad B_l=U_{l,r}\Sigma_{l,r},\quad A_l=V_{l,r}^{\mathsf T}.
+\]
+The rows of both $B_l$ and $A_l$ are converted into weighted adjacency lists,
+so a forward pass uses the graph for $A_l$ followed by the graph for $B_l$.
+This is distinct from LoRA: LoRA keeps the original matrix and adds a trained
+low-rank update, whereas this experiment replaces the matrix with its
+factorized approximation.  We evaluate ranks $r\in\{4,8,16,32,64\}$.  In
+addition to retaining every factor entry, we test a factor-level rule that
+retains entries satisfying
+$|f|>\operatorname{mean}(|F|)+k\operatorname{std}(|F|)$, with $k=0$.
+
 \subsection{Representations}
 
 The evaluated representations are:
@@ -380,6 +397,48 @@ type while retaining both positive and negative connections, rather than
 discarding one sign by default.  The complete ablation is stored in
 `reports/statistical_edge_type_ablation.csv`.
 
+\subsection{Low-rank adjacency results}
+
+The low-rank experiment was run on the three exported model seeds.  Values are
+means across seeds; storage uses FP32 values and 64-bit indices, including a
+row-pointer array for each factor.  Latencies are CPU measurements from the
+Python adjacency-list implementation and should be treated as an exploratory
+reference measurement.
+
+\begin{table}[ht]
+\centering
+\caption{Low-rank factor adjacency lists across model seeds.}
+\label{tab:lowrank}
+\small
+\begin{tabular}{rrrrrrr}
+\toprule
+Rank & Factor rule & Accuracy & Match & Factor sparsity & Storage / dense & Latency (ms) \\
+\midrule
+4  & all entries & 11.28\% & 10.86\% & 0.0\%  & 7.5\%  & 27.5 \\
+8  & all entries & 30.98\% & 31.90\% & 0.0\%  & 14.7\% & 33.4 \\
+16 & all entries & 66.66\% & 69.03\% & 0.0\%  & 28.3\% & 48.5 \\
+32 & all entries & 85.89\% & 91.12\% & 0.0\%  & 55.1\% & 72.4 \\
+64 & all entries & 88.30\% & 95.81\% & 0.0\%  & 108.7\% & 127.5 \\
+\midrule
+4  & mean+0 std & 9.90\%  & 9.46\%  & 59.5\% & 3.2\%  & 20.9 \\
+8  & mean+0 std & 33.18\% & 33.80\% & 59.3\% & 6.2\%  & 25.7 \\
+16 & mean+0 std & 56.54\% & 57.61\% & 59.6\% & 11.7\% & 31.4 \\
+32 & mean+0 std & 67.02\% & 68.80\% & 59.8\% & 22.4\% & 43.3 \\
+64 & mean+0 std & 69.22\% & 71.37\% & 60.0\% & 43.5\% & 65.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The unthresholded rank-64 factorization nearly recovered the dense baseline
+accuracy ($88.30\%$ versus $88.99\%$) but exceeded dense storage once index
+and row-pointer costs were included.  Lower ranks saved storage but caused
+large accuracy losses.  Thresholding the factors reduced storage further but
+also reduced accuracy at every rank in this pilot.  Thus, low-rank factor
+adjacency lists are a useful representation for studying the graph structure
+of a factorization, but this implementation does not yet demonstrate an
+accuracy-preserving sparse representation.  The raw measurements are stored
+in \texttt{reports/low_rank_adjacency.csv}.
+
 \subsection{Prediction preservation}
 
 The conversion and list-matvec tests pass for rectangular matrices, negative
@@ -446,6 +505,10 @@ the adjacency list is a transparent graph reference implementation, not a
 specialized sparse kernel.  The statistical experiment adds a second trade-off:
 raising $r$ reduces the number of edges and lowers list latency, but also
 removes increasingly important connections and reduces prune-only accuracy.
+The low-rank pilot adds a related storage--accuracy curve: rank 64 nearly
+recovers dense accuracy, but its factor adjacency representation is larger
+than dense under the tested index accounting, while thresholding the factors
+reduces accuracy substantially.
 
 \section{Limitations}
 
@@ -467,8 +530,8 @@ numerical and prediction equivalence, but its Python implementation is slower
 than pruned dense CPU execution.  The new statistical graph experiment shows
 that layer-wise mean-plus-standard-deviation thresholding can control graph
 density, although prune-only accuracy falls as the threshold becomes more
-aggressive.  Fine-tuning, hardware energy measurements, and optimized graph
-kernels remain future work.
+aggressive.  Fine-tuning, hardware energy measurements, optimized graph
+kernels, and a fine-tuned low-rank factor model remain future work.
 
 \bibliographystyle{plain}
 \bibliography{references}
