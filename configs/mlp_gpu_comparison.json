@@ -4,8 +4,8 @@
   "low_rank_ranks": [4, 8, 16, 32, 64],
   "low_rank_rules": [{"rule": "all"}, {"rule": "abs_std", "k": 0}, {"rule": "abs_std", "k": 1}],
   "low_rank_formats": ["factor_adjacency", "factor_dense"],
-  "energy_seconds": 2.0,
-  "energy_idle_seconds": 1.0,
+  "energy_seconds": 3.0,
+  "energy_idle_seconds": 1.5,
   "energy_preroll_seconds": 0.5,
   "energy_sample_interval_ms": 10
 }

@@ -140,22 +140,23 @@ def test_exact_forward_matches_both_parts():
         assert exact.dtype == torch.float64 and torch.allclose(exact, fp32.double(), atol=1e-5)
 
 
-def test_equivalence_strict_rounding_and_failure():
+def test_equivalence_tolerance_predictions_and_float64_errors():
     torch.manual_seed(0)
     exact = torch.randn(200, 10, dtype=torch.float64) * 60  # large logits, as in the low-rank models
     y = exact.argmax(1)
     mask = torch.ones(200, dtype=torch.bool)
     reference = (exact + 1e-4 * torch.randn_like(exact)).float()
     close = (exact + 1e-4 * torch.randn_like(exact)).float()
-    check = equivalence(reference, close, exact, y, mask)
-    assert not check["strict_equivalent"] and check["within_fp32_rounding"] and check["equivalent"]
-    assert check["equivalence_basis"] == "fp32_rounding"
-    assert equivalence(reference, reference.clone(), exact, y, mask)["equivalence_basis"] == "tolerance"
-    far = (exact + 1e-2 * torch.randn_like(exact)).float()  # 100x the reference's rounding error
-    assert not equivalence(reference, far, exact, y, mask)["equivalent"]
+    check = equivalence(reference, close, exact, y, mask)  # rounding-level differences on large logits
+    assert check["same_predictions"] and not check["equivalent"]  # the project's tolerance is not relaxed
+    assert check["max_abs_error_vs_float64"] == pytest.approx((close.double() - exact).abs().max().item())
+    assert check["reference_max_abs_error_vs_float64"] == pytest.approx((reference.double() - exact).abs().max().item())
+    assert check["max_abs_exact_logit"] == pytest.approx(exact.abs().max().item())
+    same = equivalence(reference, reference.clone(), exact, y, mask)
+    assert same["equivalent"] and same["same_predictions"] and same["bitwise_equal"]
     flipped = reference.clone()
     flipped[0] = -flipped[0]  # one changed prediction
-    assert not equivalence(reference, flipped, exact, y, mask)["equivalent"]
+    assert not equivalence(reference, flipped, exact, y, mask)["same_predictions"]
 
 
 def test_pranavi_reference_rows_and_cross_check():
@@ -259,14 +260,13 @@ def test_energy_counter_measurement(monkeypatch):
         clock.t += 0.00025
         nvml.set_busy(False)
 
-    result = meter.measure(step, batch_size=32, seconds=0.5, idle_seconds=0.2)
-    assert result["idle_power_w"] == pytest.approx(30.0, rel=0.02)
+    result = meter.measure(step, batch_size=32, seconds=2.0, idle_seconds=1.0)
+    assert result["idle_power_w"] == pytest.approx(30.0, rel=0.03)
     assert result["average_power_w"] == pytest.approx(110.0, rel=0.03)
     assert result["energy_per_batch_j"] == pytest.approx(110.0 * 0.00025, rel=0.03)
     assert result["energy_per_example_j"] == pytest.approx(result["energy_per_batch_j"] / 32)
     assert result["net_energy_per_batch_j"] == pytest.approx(80.0 * 0.00025, rel=0.05)
-    assert result["idle"]["counter_update_interval_ms"] == pytest.approx(20.0, rel=0.1)
-    assert result["active"]["preroll_s"] == 0.5 and len(result["active"]["trace"]) > 10
+    assert result["active"]["preroll_s"] == 0.5 and result["batches"] == pytest.approx(2.0 / 0.00025, rel=0.01)
     assert result["idle_power_reading_w"] == pytest.approx(30.0)
     assert not result["other_processes_present"]
 

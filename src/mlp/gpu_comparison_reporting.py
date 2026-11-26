@@ -84,7 +84,9 @@ def aggregate_benchmarks(benches):
         out[key] = {**{metric: _stats(values) for metric, values in per_seed.items()},
                     "seeds": sorted(by_seed), "runs": sum(reps),
                     "stored_bytes": max(r["weight_storage_bytes"] for runs in by_seed.values() for r in runs),
-                    "checks": len(checks), "equivalent": all(c["equivalent"] for c in checks) if checks else None,
+                    "checks": len(checks), "checks_within": sum(c["equivalent"] for c in checks),
+                    "equivalent": all(c["equivalent"] for c in checks) if checks else None,
+                    "same_predictions": all(c.get("same_predictions", True) for c in checks) if checks else None,
                     "max_epsilon": max((c["epsilon_logit"] for c in checks), default=None)}
     return out
 
@@ -106,10 +108,9 @@ def aggregate_evaluations(evals):
                 "stored_bytes": max(r["storage"][storage_format]["weight_bytes"] for r in records),
                 "units": len(records), "checks": len(checks),
                 "equivalent": all(c["equivalent"] for c in checks) if checks else None,
-                "strict": sum(c.get("strict_equivalent", c["equivalent"]) for c in checks),
-                "rounding_only": sum(bool(c.get("within_fp32_rounding")) and not c.get("strict_equivalent", True)
-                                     for c in checks),
-                "same_predictions": all(c["prediction_agreement_all"] == 1.0 for c in checks) if checks else None,
+                "strict": sum(c["equivalent"] for c in checks),
+                "same_predictions": all(c.get("same_predictions", c["prediction_agreement_all"] == 1.0)
+                                        for c in checks) if checks else None,
                 "max_epsilon": max((c["epsilon_logit"] for c in checks), default=None),
                 "float64_error": max((c.get("max_abs_error_vs_float64") or 0 for c in checks), default=None),
                 "reference_float64_error": max((c.get("reference_max_abs_error_vs_float64") or 0 for c in checks),
@@ -313,8 +314,7 @@ def summarize_comparison(results_dir, baseline_dir, out_dir, config):
                      if e["idle"].get("counter_update_interval_ms")]
         idle = _stats([e["idle_power_w"] for e in measured])
         idle_reading = _stats([e.get("idle_power_reading_w") for e in measured])
-        active_reading = _stats([((e.get("active") or {}).get("trace") or [[None, None, None]])[-1][2]
-                                 for e in measured])
+        active_reading = _stats([e.get("active_power_reading_w") for e in measured])
         active = _stats([e["average_power_w"] for e in measured])
         pids = sorted({p for e in measured for p in e.get("other_processes", [])})
         busy = sum(e["other_processes_present"] and ((e.get("state_before") or {}).get("gpu_utilization_pct") or 0) > 0
@@ -477,23 +477,22 @@ def summarize_comparison(results_dir, baseline_dir, out_dir, config):
                      else "pruned dense", n,
                      "yes" if all(v["same_predictions"] for v in evaluated) else "NO",
                      f"{sum(v['strict'] for v in evaluated)} / {n}",
-                     f"{sum(v['rounding_only'] for v in evaluated)}",
-                     "yes" if all(v["equivalent"] for v in evaluated) else "NO",
                      f"{max((v['max_epsilon'] for v in evaluated), default=0):.1e}",
                      f"{max((v['float64_error'] or 0 for v in evaluated), default=0):.1e}",
                      f"{max((v['reference_float64_error'] or 0 for v in evaluated), default=0):.1e}",
                      f"{max((v['max_logit'] or 0 for v in evaluated), default=0):.0f}",
                      f"{sum(v['checks'] for v in benched)}",
-                     "yes" if all(v["equivalent"] for v in benched) else "NO"])
+                     "yes" if all(v["same_predictions"] for v in benched) else "NO",
+                     f"{sum(v['checks_within'] for v in benched)} / {sum(v['checks'] for v in benched)}"])
     table("Equivalence with the reference implementation",
-          ["Format", "Reference", "Evaluations", "Same predictions", "Within tolerance", "Rounding-level only",
-           "Equivalent", "Max epsilon", "Max error vs float64", "Reference's error vs float64", "Max |logit|",
-           "Benchmark batches", "Batches equivalent"], rows,
-          "Evaluations cover 5,000 validation + 10,000 test images per model. Within tolerance: identical "
-          "predictions and accuracy and allclose(atol=1e-5, rtol=1e-4) against the FP32 reference (the project's "
-          "criterion). Rounding-level only: identical predictions and accuracy, outside that tolerance, and at most "
-          "2x as far from an exact float64 computation of the same model as the FP32 reference itself; this happens "
-          "when logits are large (FP32 rounding alone then exceeds the absolute tolerance).", "equivalence.csv")
+          ["Format", "Reference", "Evaluations", "Same predictions", "Within tolerance", "Max epsilon",
+           "Max error vs float64", "Reference's error vs float64", "Max |logit|", "Benchmark batches",
+           "Batches: same predictions", "Batches within tolerance"], rows,
+          "Evaluations cover 5,000 validation + 10,000 test images per model. Same predictions: identical "
+          "predicted class for every image and identical accuracy. Within tolerance: the project's criterion, "
+          "allclose(atol=1e-5, rtol=1e-4) against the FP32 reference as well. Float64 columns: largest distance "
+          "of the format and of the FP32 reference from an exact float64 computation of the same model, which "
+          "separates rounding (different summation order, large logits) from errors.", "equivalence.csv")
 
     rows = []
     for r in sorted(evals, key=lambda r: r["tag"]):

@@ -11,9 +11,7 @@ from src.mlp.gpu_comparison_reporting import aggregate_benchmarks, summarize_com
 
 def _check(strict=True):
     """A format check as src/mlp/gpu_comparison.equivalence writes it."""
-    return {"equivalent": True, "strict_equivalent": strict, "within_fp32_rounding": True,
-            "equivalence_basis": "tolerance" if strict else "fp32_rounding",
-            "epsilon_logit": 1e-6 if strict else 1.2e-4,
+    return {"equivalent": strict, "same_predictions": True, "epsilon_logit": 1e-6 if strict else 1.2e-4,
             "bitwise_equal": False, "prediction_agreement_all": 1.0, "max_abs_error_vs_float64": 1.2e-4,
             "reference_max_abs_error_vs_float64": 1.2e-4, "max_abs_exact_logit": 116.0}
 
@@ -25,7 +23,7 @@ def _energy(per_example, batch):
             "energy_per_batch_j": per_batch, "energy_per_example_j": per_example, "idle_power_w": 30.0,
             "net_average_power_w": 75.0, "net_energy_per_batch_j": per_batch * 0.7,
             "net_energy_per_example_j": per_example * 0.7, "idle": {"counter_update_interval_ms": 100.0},
-            "idle_power_reading_w": 31.0, "active": {"trace": [[0.0, 1, 104.0], [2.01, 2, 106.0]]},
+            "idle_power_reading_w": 31.0, "active_power_reading_w": 106.0, "active": {"batches": 1000},
             "state_before": {"gpu_utilization_pct": 0}, "other_processes": [3700], "other_processes_present": True}
 
 
@@ -80,7 +78,7 @@ def dirs(tmp_path):
                                  "cuda_allocated_before_inference_bytes": 330_000,
                                  "cuda_peak_allocated_bytes": 340_000 + batch, "energy": _energy(2e-5 / batch, batch),
                                  "weight_storage_bytes": record["storage"][storage_format]["weight_bytes"],
-                                 "format_check": None if storage_format == reference else _check(),
+                                 "format_check": None if storage_format == reference else _check(kind != "low_rank"),
                                  "latency_is_debug_only": False, "device": "cuda:1", "device_name": "RTX 3090",
                                  "edges": 26_620, "checkpoint": {"sha256": "abc"}}
                         (root / "benchmark" / f"{n}.json").write_text(json.dumps(bench))
@@ -118,9 +116,11 @@ def test_summary_sections_and_files(dirs, tmp_path):
     assert "PIDs 3700" in text and "in 0 of them the GPU was busy" in text
     with open(tmp_path / "summary" / "equivalence.csv") as f:
         equivalence = {r["Format"]: r for r in csv.DictReader(f)}
-    assert equivalence["CSR"]["Within tolerance"] == "2 / 2" and equivalence["CSR"]["Rounding-level only"] == "0"
+    assert equivalence["CSR"]["Within tolerance"] == "2 / 2" and equivalence["CSR"]["Same predictions"] == "yes"
     lists = equivalence["factor adjacency list"]
-    assert lists["Within tolerance"] == "0 / 2" and lists["Rounding-level only"] == "2" and lists["Equivalent"] == "yes"
+    assert lists["Within tolerance"] == "0 / 2" and lists["Same predictions"] == "yes"
+    assert lists["Batches within tolerance"] == "0 / 12" and lists["Max |logit|"] == "116"
+    assert equivalence["CSR"]["Batches within tolerance"] == "12 / 12"
     with open(tmp_path / "summary" / "runs.csv") as f:
         rows = list(csv.DictReader(f))
     assert len(rows) == 2 * (1 + 5 + 2) * 3 * 2 and rows[0]["energy_per_example_j"] != ""

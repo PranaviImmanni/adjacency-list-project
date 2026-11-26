@@ -22,17 +22,7 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.gcn.measurement import resolve_device
-from src.mlp.energy import close_meter, open_meter
-
-POWER_INSTANT_FIELD = 186  # NVML_FI_DEV_POWER_INSTANT (newer drivers only)
-
-
-def instant_power_w(nvml, handle):
-    try:
-        value = nvml.nvmlDeviceGetFieldValues(handle, [POWER_INSTANT_FIELD])[0]
-        return None if value.nvmlReturn != 0 else value.value.uiVal / 1e3
-    except Exception:
-        return None
+from src.mlp.energy import close_meter, instant_power_w, open_meter
 
 
 def main():

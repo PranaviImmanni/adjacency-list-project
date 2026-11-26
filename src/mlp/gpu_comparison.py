@@ -178,9 +178,6 @@ def cross_check(reference, test_accuracy, edges, test_images, stored_bytes=None,
 # Equivalence: the project's tolerance, and a check against an exact float64 computation
 # ---------------------------------------------------------------------------------------------
 
-ROUNDING_SLACK = 2.0  # a format may be up to 2x as far from exact float64 as its FP32 reference
-
-
 def exact_forward(spec, prepared, model):
     """Float64 forward on CPU of exactly the same modified model (the same stored FP32 values).
 
@@ -212,24 +209,20 @@ def exact_forward(spec, prepared, model):
 
 
 def equivalence(reference_logits, logits, exact_logits, y, mask):
-    """The project's format check, plus the same predictions with FP32-rounding-level error.
+    """The project's format check, unchanged, plus each implementation's distance from exact float64.
 
-    strict_equivalent: identical predictions and accuracy, and allclose(atol=1e-5,
-    rtol=1e-4) against the FP32 reference (src/gcn/evaluation.is_equivalent).
-    within_fp32_rounding: identical predictions and accuracy, and the format is at most
-    ROUNDING_SLACK times as far from the exact float64 result as the FP32 reference is.
-    Large logits (the low-rank models reach about 100) make FP32 rounding alone exceed
-    the absolute tolerance, for the reference as much as for the format.
-    equivalent: either of the two; equivalence_basis says which.
+    equivalent: identical predictions and accuracy and allclose(atol=1e-5, rtol=1e-4) against
+    the FP32 reference (src/gcn/evaluation.is_equivalent), as for every format in the project.
+    same_predictions: identical predictions on every image and identical accuracy; a format
+    without it is wrong, and the evaluation fails.
+    max_abs_error_vs_float64 / reference_max_abs_error_vs_float64: how far the format and the
+    FP32 reference are from an exact float64 computation of the same model. They show whether a
+    missed tolerance is rounding (large logits; different summation order) or an error.
     """
     check = format_comparison(reference_logits, logits, y, mask)
-    error = (logits.detach().cpu().double() - exact_logits).abs().max().item()
-    reference_error = (reference_logits.detach().cpu().double() - exact_logits).abs().max().item()
-    same_predictions = check["prediction_agreement_all"] == 1.0 and check["abs_accuracy_difference_pp"] == 0.0
-    rounding = same_predictions and error <= ROUNDING_SLACK * reference_error + 1e-6
-    strict = check["equivalent"]
-    check.update(strict_equivalent=strict, within_fp32_rounding=rounding, equivalent=strict or rounding,
-                 equivalence_basis="tolerance" if strict else ("fp32_rounding" if rounding else None),
-                 max_abs_error_vs_float64=error, reference_max_abs_error_vs_float64=reference_error,
-                 max_abs_exact_logit=exact_logits.abs().max().item())
+    check.update(
+        same_predictions=check["prediction_agreement_all"] == 1.0 and check["abs_accuracy_difference_pp"] == 0.0,
+        max_abs_error_vs_float64=(logits.detach().cpu().double() - exact_logits).abs().max().item(),
+        reference_max_abs_error_vs_float64=(reference_logits.detach().cpu().double() - exact_logits).abs().max().item(),
+        max_abs_exact_logit=exact_logits.abs().max().item())
     return check

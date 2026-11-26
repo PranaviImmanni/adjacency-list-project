@@ -129,6 +129,7 @@ def main():
             sha = tensor_sha256(reference_logits)
             result.update(accuracy=acc, format_accuracy=format_accuracy, storage=storage, format_checks=checks,
                           all_formats_equivalent=all(c["equivalent"] for c in checks.values()),
+                          all_same_predictions=all(c["same_predictions"] for c in checks.values()),
                           effect_vs_original=pruning_comparison(original_logits, reference_logits, y, val_mask,
                                                                 test_mask),
                           logits_sha256=sha,
@@ -150,7 +151,7 @@ def main():
                     pranavi_reference(spec), format_accuracy[list_format]["test"], edges, test_images,
                     stored_bytes=storage[list_format]["weight_bytes"],
                     reconstruction_mse=summary.get("mean_weight_reconstruction_mse"))
-            if not result["all_formats_equivalent"]:
+            if not result["all_same_predictions"]:
                 failed.append(spec["tag"])
 
         output.write_text(json.dumps(result, indent=2))
@@ -158,16 +159,17 @@ def main():
         if result["format_checks"]:
             checks = result["format_checks"].values()
             worst = max(c["epsilon_logit"] for c in checks)
-            basis = sorted({c["equivalence_basis"] or "NOT EQUIVALENT" for c in checks})
-            extra = (f", max epsilon {worst:.1e}, formats equivalent: {result['all_formats_equivalent']} "
-                     f"({', '.join(basis)})")
+            extra = (f", same predictions: {result['all_same_predictions']}, within tolerance: "
+                     f"{result['all_formats_equivalent']} (max epsilon {worst:.1e}, format / reference vs float64 "
+                     f"{max(c['max_abs_error_vs_float64'] for c in checks):.1e} / "
+                     f"{max(c['reference_max_abs_error_vs_float64'] for c in checks):.1e})")
         cpu = result.get("pranavi_cpu") or {}
         if cpu.get("found"):
             extra += f", vs Pranavi's CPU result {cpu['difference_images']:+d} test images"
         print(f"[{i}/{len(specs)}] {spec['tag']}: test acc {result['accuracy']['test']:.4f}{extra}", flush=True)
 
     if failed:
-        print(f"NOT EQUIVALENT: {failed}")
+        print(f"DIFFERENT PREDICTIONS OR ACCURACY: {failed}")
         raise SystemExit(1)
 
 

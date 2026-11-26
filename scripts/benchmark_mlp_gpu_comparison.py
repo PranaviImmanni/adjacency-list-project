@@ -199,7 +199,9 @@ def main():
                    if energy["available"] else f", energy: {energy['reason']}")
     print(f"{args.tag} {args.storage_format} b{args.batch_size} rep {args.repetition}: median "
           f"{result['latency_ms']['median']:.4f} ms [{label}], weights {result['weight_storage_bytes']:,} B"
-          + energy_text + ("" if check is None else f", matches {result['reference_format']}: {check['equivalent']}"))
+          + energy_text + ("" if check is None else
+                           f", vs {result['reference_format']}: same predictions {check['same_predictions']}, "
+                           f"within tolerance {check['equivalent']}"))
 
 
 if __name__ == "__main__":
