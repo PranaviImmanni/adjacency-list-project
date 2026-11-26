@@ -113,7 +113,7 @@ def test_summary_sections_and_files(dirs, tmp_path):
                     "## Consistency with the original sweep"):
         assert heading in text
     assert "total_energy_counter" in text and "matched by uuid" in text and "CPU debug" not in text
-    assert "PIDs 3700" in text and "in 0 of them the GPU was busy" in text
+    assert "PIDs 3700" in text and "right before the measurement: 0 runs" in text
     with open(tmp_path / "summary" / "equivalence.csv") as f:
         equivalence = {r["Format"]: r for r in csv.DictReader(f)}
     assert equivalence["CSR"]["Within tolerance"] == "2 / 2" and equivalence["CSR"]["Same predictions"] == "yes"

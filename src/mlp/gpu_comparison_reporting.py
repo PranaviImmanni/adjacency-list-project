@@ -332,9 +332,10 @@ def summarize_comparison(results_dir, baseline_dir, out_dir, config):
                   f"{_w(active_reading)} W."
                   + (f" Energy counter update interval: median {statistics.median(intervals):.1f} ms."
                      if intervals else ""),
-                  f"- Runs with another process on the GPU: {others} (PIDs {', '.join(map(str, pids)) or '-'}); "
-                  f"in {busy} of them the GPU was busy (utilization > 0) right before the measurement. NVML measures "
-                  "the whole card, so a busy process would add its power.",
+                  f"- Runs with another process on the GPU: {others} (PIDs {', '.join(map(str, pids)) or '-'}). NVML "
+                  "measures the whole card, so work by another process would raise the idle power measured in every "
+                  f"run (range above). GPU utilization above 0 right before the measurement: {busy} runs (this "
+                  "sample also covers our own latency timing, which ends just before).",
                   "- Gross = what the card drew during the window; net = gross minus idle power x window length.", ""]
     else:
         reasons = sorted({e.get("reason", "unknown") for e in energies})
