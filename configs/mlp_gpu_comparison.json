@@ -6,5 +6,6 @@
   "low_rank_formats": ["factor_adjacency", "factor_dense"],
   "energy_seconds": 2.0,
   "energy_idle_seconds": 1.0,
+  "energy_preroll_seconds": 0.5,
   "energy_sample_interval_ms": 10
 }

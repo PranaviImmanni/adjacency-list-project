@@ -71,7 +71,7 @@ def load_followup_config(path=FOLLOWUP_CONFIG_PATH):
 COMPARISON_CONFIG_PATH = PROJECT_ROOT / "configs" / "mlp_gpu_comparison.json"
 COMPARISON_KEYS = {
     "base_config", "pruned_formats", "low_rank_ranks", "low_rank_rules", "low_rank_formats", "energy_seconds",
-    "energy_idle_seconds", "energy_sample_interval_ms",
+    "energy_idle_seconds", "energy_preroll_seconds", "energy_sample_interval_ms",
 }
 
 

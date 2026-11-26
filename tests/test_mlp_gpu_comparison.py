@@ -11,7 +11,8 @@ from src.gcn.config import PROJECT_ROOT
 from src.mlp.config import load_comparison_config
 from src.mlp.energy import EnergyMeter, match_handle, open_meter
 from src.mlp.formats import AdjacencyList, build_format_model
-from src.mlp.gpu_comparison import build, cross_check, pilot_plan, plan, prepare, pranavi_reference, resident_ok
+from src.mlp.gpu_comparison import (build, cross_check, equivalence, exact_forward, pilot_plan, plan, prepare,
+                                    pranavi_reference, resident_ok)
 from src.mlp.low_rank import build_low_rank_model, low_rank_factors
 from src.mlp.model import MLP
 from src.mlp.weight_pruning import prune_layers
@@ -127,6 +128,36 @@ def test_prepare_and_build_every_format():
                 assert torch.allclose(out, reference(x), atol=1e-5, rtol=1e-4)
 
 
+def test_exact_forward_matches_both_parts():
+    config = {**load_comparison_config(), "pruned_layers": ["fc1", "fc2", "fc3"]}
+    model = _model()
+    x = torch.randn(5, 20)
+    for spec in (s for s in plan(config, 0, "benchmark") if s["tag"] in ("m0_magnitude_s90", "m0_lowrank_r4_all")):
+        prepared = prepare(spec, model, config)
+        with torch.inference_mode():
+            fp32 = build(spec, prepared, model, spec["reference_format"])(x)
+        exact = exact_forward(spec, prepared, model)(x)
+        assert exact.dtype == torch.float64 and torch.allclose(exact, fp32.double(), atol=1e-5)
+
+
+def test_equivalence_strict_rounding_and_failure():
+    torch.manual_seed(0)
+    exact = torch.randn(200, 10, dtype=torch.float64) * 60  # large logits, as in the low-rank models
+    y = exact.argmax(1)
+    mask = torch.ones(200, dtype=torch.bool)
+    reference = (exact + 1e-4 * torch.randn_like(exact)).float()
+    close = (exact + 1e-4 * torch.randn_like(exact)).float()
+    check = equivalence(reference, close, exact, y, mask)
+    assert not check["strict_equivalent"] and check["within_fp32_rounding"] and check["equivalent"]
+    assert check["equivalence_basis"] == "fp32_rounding"
+    assert equivalence(reference, reference.clone(), exact, y, mask)["equivalence_basis"] == "tolerance"
+    far = (exact + 1e-2 * torch.randn_like(exact)).float()  # 100x the reference's rounding error
+    assert not equivalence(reference, far, exact, y, mask)["equivalent"]
+    flipped = reference.clone()
+    flipped[0] = -flipped[0]  # one changed prediction
+    assert not equivalence(reference, flipped, exact, y, mask)["equivalent"]
+
+
 def test_pranavi_reference_rows_and_cross_check():
     config = load_comparison_config()
     specs = {s["tag"]: s for s in plan(config, 42, "evaluate")}
@@ -235,6 +266,8 @@ def test_energy_counter_measurement(monkeypatch):
     assert result["energy_per_example_j"] == pytest.approx(result["energy_per_batch_j"] / 32)
     assert result["net_energy_per_batch_j"] == pytest.approx(80.0 * 0.00025, rel=0.05)
     assert result["idle"]["counter_update_interval_ms"] == pytest.approx(20.0, rel=0.1)
+    assert result["active"]["preroll_s"] == 0.5 and len(result["active"]["trace"]) > 10
+    assert result["idle_power_reading_w"] == pytest.approx(30.0)
     assert not result["other_processes_present"]
 
 

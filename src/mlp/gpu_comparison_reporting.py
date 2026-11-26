@@ -106,7 +106,15 @@ def aggregate_evaluations(evals):
                 "stored_bytes": max(r["storage"][storage_format]["weight_bytes"] for r in records),
                 "units": len(records), "checks": len(checks),
                 "equivalent": all(c["equivalent"] for c in checks) if checks else None,
+                "strict": sum(c.get("strict_equivalent", c["equivalent"]) for c in checks),
+                "rounding_only": sum(bool(c.get("within_fp32_rounding")) and not c.get("strict_equivalent", True)
+                                     for c in checks),
+                "same_predictions": all(c["prediction_agreement_all"] == 1.0 for c in checks) if checks else None,
                 "max_epsilon": max((c["epsilon_logit"] for c in checks), default=None),
+                "float64_error": max((c.get("max_abs_error_vs_float64") or 0 for c in checks), default=None),
+                "reference_float64_error": max((c.get("reference_max_abs_error_vs_float64") or 0 for c in checks),
+                                               default=None),
+                "max_logit": max((c.get("max_abs_exact_logit") or 0 for c in checks), default=None),
                 "bitwise": all(c.get("bitwise_equal") for c in checks) if checks else None,
             }
         effects = [r["effect_vs_original"] for r in records if r.get("effect_vs_original")]
@@ -304,6 +312,13 @@ def summarize_comparison(results_dir, baseline_dir, out_dir, config):
         intervals = [e["idle"].get("counter_update_interval_ms") for e in measured
                      if e["idle"].get("counter_update_interval_ms")]
         idle = _stats([e["idle_power_w"] for e in measured])
+        idle_reading = _stats([e.get("idle_power_reading_w") for e in measured])
+        active_reading = _stats([((e.get("active") or {}).get("trace") or [[None, None, None]])[-1][2]
+                                 for e in measured])
+        active = _stats([e["average_power_w"] for e in measured])
+        pids = sorted({p for e in measured for p in e.get("other_processes", [])})
+        busy = sum(e["other_processes_present"] and ((e.get("state_before") or {}).get("gpu_utilization_pct") or 0) > 0
+                   for e in measured)
         window = statistics.median([e["duration_s"] for e in measured])
         others = sum(e["other_processes_present"] for e in measured)
         lines += [f"- Measured in {len(measured)} of {len(energies)} runs with NVML ({', '.join(methods)}), "
@@ -312,11 +327,14 @@ def summarize_comparison(results_dir, baseline_dir, out_dir, config):
                   f"- Active window: synchronized inference of the benchmark batch for at least "
                   f"{config['energy_seconds']:g} s (median {window:.2f} s); "
                   f"idle window {config['energy_idle_seconds']:g} s before it, with the model loaded.",
-                  f"- Idle power: {_w(idle)} W."
+                  f"- Idle power from the counter: {_w(idle)} W; NVML's power reading at the end of the idle window: "
+                  f"{_w(idle_reading)} W. Active: counter {_w(active)} W, power reading at the end of the window "
+                  f"{_w(active_reading)} W."
                   + (f" Energy counter update interval: median {statistics.median(intervals):.1f} ms."
                      if intervals else ""),
-                  f"- Runs with another process on the GPU: {others}"
-                  + (" (NVML measures the whole card: those runs include its power)." if others else "."),
+                  f"- Runs with another process on the GPU: {others} (PIDs {', '.join(map(str, pids)) or '-'}); "
+                  f"in {busy} of them the GPU was busy (utilization > 0) right before the measurement. NVML measures "
+                  "the whole card, so a busy process would add its power.",
                   "- Gross = what the card drew during the window; net = gross minus idle power x window length.", ""]
     else:
         reasons = sorted({e.get("reason", "unknown") for e in energies})
@@ -454,18 +472,28 @@ def summarize_comparison(results_dir, baseline_dir, out_dir, config):
         benched = [v for (key, fmt, b), v in bench_agg.items() if fmt == storage_format and v["checks"]]
         if not evaluated and not benched:
             continue
+        n = sum(v["checks"] for v in evaluated)
         rows.append([FORMAT_LABELS[storage_format], "dense factors" if storage_format == "factor_adjacency"
-                     else "pruned dense", sum(v["checks"] for v in evaluated),
+                     else "pruned dense", n,
+                     "yes" if all(v["same_predictions"] for v in evaluated) else "NO",
+                     f"{sum(v['strict'] for v in evaluated)} / {n}",
+                     f"{sum(v['rounding_only'] for v in evaluated)}",
                      "yes" if all(v["equivalent"] for v in evaluated) else "NO",
-                     "yes" if evaluated and all(v["bitwise"] for v in evaluated) else "no",
                      f"{max((v['max_epsilon'] for v in evaluated), default=0):.1e}",
-                     sum(v["checks"] for v in benched),
+                     f"{max((v['float64_error'] or 0 for v in evaluated), default=0):.1e}",
+                     f"{max((v['reference_float64_error'] or 0 for v in evaluated), default=0):.1e}",
+                     f"{max((v['max_logit'] or 0 for v in evaluated), default=0):.0f}",
+                     f"{sum(v['checks'] for v in benched)}",
                      "yes" if all(v["equivalent"] for v in benched) else "NO"])
-    table("Equivalence with the reference implementation", ["Format", "Reference", "Evaluations", "Equivalent",
-                                                            "Bitwise", "Max epsilon", "Benchmark batches",
-                                                            "Batches equivalent"], rows,
-          "Evaluations cover 5,000 validation + 10,000 test images per model; tolerance allclose(atol=1e-5, "
-          "rtol=1e-4) with prediction agreement and the margin condition.", "equivalence.csv")
+    table("Equivalence with the reference implementation",
+          ["Format", "Reference", "Evaluations", "Same predictions", "Within tolerance", "Rounding-level only",
+           "Equivalent", "Max epsilon", "Max error vs float64", "Reference's error vs float64", "Max |logit|",
+           "Benchmark batches", "Batches equivalent"], rows,
+          "Evaluations cover 5,000 validation + 10,000 test images per model. Within tolerance: identical "
+          "predictions and accuracy and allclose(atol=1e-5, rtol=1e-4) against the FP32 reference (the project's "
+          "criterion). Rounding-level only: identical predictions and accuracy, outside that tolerance, and at most "
+          "2x as far from an exact float64 computation of the same model as the FP32 reference itself; this happens "
+          "when logits are large (FP32 rounding alone then exceeds the absolute tolerance).", "equivalence.csv")
 
     rows = []
     for r in sorted(evals, key=lambda r: r["tag"]):

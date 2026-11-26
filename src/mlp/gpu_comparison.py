@@ -19,7 +19,7 @@ import torch
 
 from src.gcn.config import PROJECT_ROOT
 
-from .experiment import condition_tag, conditions
+from .experiment import condition_tag, conditions, format_comparison
 from .formats import ADJACENCY_FORMAT, SPARSE_FORMATS, build_format_model
 from .low_rank import build_low_rank_model, low_rank_factors, rule_label
 from .weight_pruning import prune_layers
@@ -172,3 +172,64 @@ def cross_check(reference, test_accuracy, edges, test_images, stored_bytes=None,
         ref = reference["mean_weight_reconstruction_mse"]
         out["reconstruction_mse_relative_difference"] = abs(reconstruction_mse - ref) / ref if ref else None
     return out
+
+
+# ---------------------------------------------------------------------------------------------
+# Equivalence: the project's tolerance, and a check against an exact float64 computation
+# ---------------------------------------------------------------------------------------------
+
+ROUNDING_SLACK = 2.0  # a format may be up to 2x as far from exact float64 as its FP32 reference
+
+
+def exact_forward(spec, prepared, model):
+    """Float64 forward on CPU of exactly the same modified model (the same stored FP32 values).
+
+    Its own rounding error is about 1e-15 relative, so it measures how far each FP32
+    implementation (the reference included) is from the exact result.
+    """
+    if spec["kind"] == "low_rank":
+        layers = [((f["A"].double(), f["B"].double()), f["bias"].double()) for f in prepared["factors"].values()]
+    else:
+        masks = prepared["masks"]
+        layers = []
+        for name, linear in zip(model.layer_names, model.layers()):
+            weight = linear.weight.detach().cpu()
+            if name in masks:
+                weight = torch.where(masks[name], weight, torch.zeros((), dtype=weight.dtype))
+            layers.append(((weight.double(),), linear.bias.detach().cpu().double()))
+
+    def forward(x):
+        h = x.detach().cpu().double()
+        for i, (matrices, bias) in enumerate(layers):
+            for matrix in matrices:  # (W,) or (A, B): h A^T B^T
+                h = h @ matrix.t()
+            h = h + bias
+            if i < len(layers) - 1:
+                h = torch.relu(h)
+        return h
+
+    return forward
+
+
+def equivalence(reference_logits, logits, exact_logits, y, mask):
+    """The project's format check, plus the same predictions with FP32-rounding-level error.
+
+    strict_equivalent: identical predictions and accuracy, and allclose(atol=1e-5,
+    rtol=1e-4) against the FP32 reference (src/gcn/evaluation.is_equivalent).
+    within_fp32_rounding: identical predictions and accuracy, and the format is at most
+    ROUNDING_SLACK times as far from the exact float64 result as the FP32 reference is.
+    Large logits (the low-rank models reach about 100) make FP32 rounding alone exceed
+    the absolute tolerance, for the reference as much as for the format.
+    equivalent: either of the two; equivalence_basis says which.
+    """
+    check = format_comparison(reference_logits, logits, y, mask)
+    error = (logits.detach().cpu().double() - exact_logits).abs().max().item()
+    reference_error = (reference_logits.detach().cpu().double() - exact_logits).abs().max().item()
+    same_predictions = check["prediction_agreement_all"] == 1.0 and check["abs_accuracy_difference_pp"] == 0.0
+    rounding = same_predictions and error <= ROUNDING_SLACK * reference_error + 1e-6
+    strict = check["equivalent"]
+    check.update(strict_equivalent=strict, within_fp32_rounding=rounding, equivalent=strict or rounding,
+                 equivalence_basis="tolerance" if strict else ("fp32_rounding" if rounding else None),
+                 max_abs_error_vs_float64=error, reference_max_abs_error_vs_float64=reference_error,
+                 max_abs_exact_logit=exact_logits.abs().max().item())
+    return check

@@ -31,10 +31,10 @@ from src.gcn.measurement import check_format_supported, configure_precision, dev
 from src.gcn.pruning import tensor_sha256
 from src.mlp.config import COMPARISON_CONFIG_PATH, load_comparison_config
 from src.mlp.data import load_for_checkpoint
-from src.mlp.experiment import accuracies, format_comparison, logits_in_batches, pruning_comparison
+from src.mlp.experiment import accuracies, logits_in_batches, pruning_comparison
 from src.mlp.formats import build_format_model
-from src.mlp.gpu_comparison import (PARTS, build, cross_check, pilot_plan, plan, pranavi_reference, prepare,
-                                    spec_fields)
+from src.mlp.gpu_comparison import (PARTS, build, cross_check, equivalence, exact_forward, pilot_plan, plan,
+                                    pranavi_reference, prepare, spec_fields)
 from src.mlp.model import checkpoint_identity, load_mlp_checkpoint
 
 SCHEMA_VERSION = 1
@@ -113,6 +113,7 @@ def main():
             storage = {reference_format: reference.storage()}
             reference_logits = logits_in_batches(reference.to(device), x, batch, device)
             del reference
+            exact = exact_forward(spec, prepared, model)(x)
             checks, format_accuracy = {}, {reference_format: accuracies(reference_logits, y, val_mask, test_mask)}
             for storage_format in spec["formats"]:
                 if storage_format == reference_format:
@@ -121,7 +122,7 @@ def main():
                 storage[storage_format] = variant.storage()
                 logits = logits_in_batches(variant.to(device), x, batch, device)
                 del variant
-                checks[storage_format] = format_comparison(reference_logits, logits, y, test_mask)
+                checks[storage_format] = equivalence(reference_logits, logits, exact, y, test_mask)
                 checks[storage_format]["reference"] = f"{reference_format} on {device}"
                 format_accuracy[storage_format] = accuracies(logits, y, val_mask, test_mask)
             acc = format_accuracy[reference_format]
@@ -130,7 +131,8 @@ def main():
                           all_formats_equivalent=all(c["equivalent"] for c in checks.values()),
                           effect_vs_original=pruning_comparison(original_logits, reference_logits, y, val_mask,
                                                                 test_mask),
-                          logits_sha256=sha)
+                          logits_sha256=sha,
+                          reference_max_abs_error_vs_float64=(reference_logits.double() - exact).abs().max().item())
             if spec["kind"] == "pruned":
                 summary = prepared["summary"]
                 edges = sum(int(m.sum()) for m in prepared["masks"].values())
@@ -154,8 +156,11 @@ def main():
         output.write_text(json.dumps(result, indent=2))
         extra = ""
         if result["format_checks"]:
-            worst = max(c["epsilon_logit"] for c in result["format_checks"].values())
-            extra = f", max epsilon {worst:.1e}, formats equivalent: {result['all_formats_equivalent']}"
+            checks = result["format_checks"].values()
+            worst = max(c["epsilon_logit"] for c in checks)
+            basis = sorted({c["equivalence_basis"] or "NOT EQUIVALENT" for c in checks})
+            extra = (f", max epsilon {worst:.1e}, formats equivalent: {result['all_formats_equivalent']} "
+                     f"({', '.join(basis)})")
         cpu = result.get("pranavi_cpu") or {}
         if cpu.get("found"):
             extra += f", vs Pranavi's CPU result {cpu['difference_images']:+d} test images"

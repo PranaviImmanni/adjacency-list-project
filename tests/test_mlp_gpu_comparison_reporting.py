@@ -9,8 +9,13 @@ from src.mlp.config import load_comparison_config
 from src.mlp.gpu_comparison_reporting import aggregate_benchmarks, summarize_comparison
 
 
-def _check():
-    return {"equivalent": True, "epsilon_logit": 1e-6, "bitwise_equal": False}
+def _check(strict=True):
+    """A format check as src/mlp/gpu_comparison.equivalence writes it."""
+    return {"equivalent": True, "strict_equivalent": strict, "within_fp32_rounding": True,
+            "equivalence_basis": "tolerance" if strict else "fp32_rounding",
+            "epsilon_logit": 1e-6 if strict else 1.2e-4,
+            "bitwise_equal": False, "prediction_agreement_all": 1.0, "max_abs_error_vs_float64": 1.2e-4,
+            "reference_max_abs_error_vs_float64": 1.2e-4, "max_abs_exact_logit": 116.0}
 
 
 def _energy(per_example, batch):
@@ -19,8 +24,9 @@ def _energy(per_example, batch):
             "duration_s": 2.01, "batches": 1000, "energy_j": per_batch * 1000, "average_power_w": 105.0,
             "energy_per_batch_j": per_batch, "energy_per_example_j": per_example, "idle_power_w": 30.0,
             "net_average_power_w": 75.0, "net_energy_per_batch_j": per_batch * 0.7,
-            "net_energy_per_example_j": per_example * 0.7, "idle": {"counter_update_interval_ms": 20.0},
-            "other_processes_present": False}
+            "net_energy_per_example_j": per_example * 0.7, "idle": {"counter_update_interval_ms": 100.0},
+            "idle_power_reading_w": 31.0, "active": {"trace": [[0.0, 1, 104.0], [2.01, 2, 106.0]]},
+            "state_before": {"gpu_utilization_pct": 0}, "other_processes": [3700], "other_processes_present": True}
 
 
 def _spec_fields(kind, method=None, sparsity=None, rank=None, rule=None):
@@ -52,7 +58,7 @@ def dirs(tmp_path):
                       "format_accuracy": {f: {"val": acc, "test": acc} for f in formats},
                       "storage": {f: {"weight_bytes": 322_744 if f in ("csr", "adjacency_list") else 1_064_800}
                                   for f in formats},
-                      "format_checks": {f: _check() for f in formats if f != reference},
+                      "format_checks": {f: _check(kind != "low_rank") for f in formats if f != reference},
                       "edges": 26_620, "actual_sparsity": sparsity,
                       "original_sweep": {"found": kind != "low_rank", "path": "results/mlp/cuda1/evaluate/x.json",
                                          "test_accuracy_equal": True, "logits_sha256_equal": True}}
@@ -109,6 +115,12 @@ def test_summary_sections_and_files(dirs, tmp_path):
                     "## Consistency with the original sweep"):
         assert heading in text
     assert "total_energy_counter" in text and "matched by uuid" in text and "CPU debug" not in text
+    assert "PIDs 3700" in text and "in 0 of them the GPU was busy" in text
+    with open(tmp_path / "summary" / "equivalence.csv") as f:
+        equivalence = {r["Format"]: r for r in csv.DictReader(f)}
+    assert equivalence["CSR"]["Within tolerance"] == "2 / 2" and equivalence["CSR"]["Rounding-level only"] == "0"
+    lists = equivalence["factor adjacency list"]
+    assert lists["Within tolerance"] == "0 / 2" and lists["Rounding-level only"] == "2" and lists["Equivalent"] == "yes"
     with open(tmp_path / "summary" / "runs.csv") as f:
         rows = list(csv.DictReader(f))
     assert len(rows) == 2 * (1 + 5 + 2) * 3 * 2 and rows[0]["energy_per_example_j"] != ""

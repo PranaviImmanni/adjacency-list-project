@@ -41,8 +41,7 @@ from src.gcn.pruning import tensor_sha256
 from src.mlp.config import COMPARISON_CONFIG_PATH, load_comparison_config
 from src.mlp.data import load_for_checkpoint
 from src.mlp.energy import close_meter, open_meter, unavailable
-from src.mlp.experiment import format_comparison
-from src.mlp.gpu_comparison import build, find_spec, prepare, resident_ok, spec_fields
+from src.mlp.gpu_comparison import build, equivalence, exact_forward, find_spec, prepare, resident_ok, spec_fields
 from src.mlp.harness import make_batch, time_inference
 from src.mlp.model import checkpoint_identity, load_mlp_checkpoint
 
@@ -62,7 +61,8 @@ def measure_energy(model, x, device, config, enabled):
 
     try:
         with torch.inference_mode():
-            return meter.measure(step, len(x), config["energy_seconds"], config["energy_idle_seconds"])
+            return meter.measure(step, len(x), config["energy_seconds"], config["energy_idle_seconds"],
+                                 config["energy_preroll_seconds"])
     except Exception as error:  # energy failing must not lose the latency / memory result
         return unavailable(f"measurement failed: {error!r}")
     finally:
@@ -115,7 +115,8 @@ def run(args):
         reference = build(spec, prepared, model, reference_format).to(device)
         with torch.inference_mode():
             reference_logits = reference(x).cpu()
-        format_check = format_comparison(reference_logits, logits, y, torch.ones(len(y), dtype=torch.bool))
+        exact = exact_forward(spec, prepared, model)(x)
+        format_check = equivalence(reference_logits, logits, exact, y, torch.ones(len(y), dtype=torch.bool))
         format_check["reference"] = f"{reference_format} on {device}, same batch"
 
     summary = prepared["summary"]

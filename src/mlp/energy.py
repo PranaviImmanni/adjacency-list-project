@@ -3,17 +3,20 @@
 What is measured, for one model / format / batch on one CUDA device:
   1. idle: nothing runs for `idle_seconds` (the model is loaded); average idle power.
   2. active: the batch is run back to back, each pass followed by a device
-     synchronize (the same synchronized inference as the latency timing),
-     for at least `seconds`. Energy, time and the number of passes are recorded.
+     synchronize (the same synchronized inference as the latency timing). It
+     first runs for `preroll_seconds` so the clocks are up, then the window
+     opens and lasts at least `seconds`. Energy, time and passes are recorded.
 Reported: average power (W), energy per batch (J) and per example (J), each
 gross (what the card drew) and net of idle power (gross - idle power x time).
 
 Two NVML methods, chosen per run and recorded:
   total_energy_counter  nvmlDeviceGetTotalEnergyConsumption (mJ since driver
-                        load). The counter only changes every few ms, so both
-                        ends of each window are aligned to a counter change: the
-                        window starts right after a change and the workload
-                        runs until the counter changes again after `seconds`.
+                        load). The counter only changes every ~100 ms, so both
+                        ends of each window are aligned to a counter change (the
+                        workload keeps running across the active window's ends).
+                        Every counter change is recorded with NVML's power
+                        reading at that moment (the trace), so each window can be
+                        checked against the power readings afterwards.
   power_sampling        fallback when the counter is not supported: a thread
                         samples nvmlDeviceGetPowerUsage every
                         `sample_interval_ms` and the power is integrated over
@@ -125,6 +128,9 @@ class EnergyMeter:
     def _energy_mj(self):
         return self.nvml.nvmlDeviceGetTotalEnergyConsumption(self.handle)
 
+    def _power_w(self):
+        return self._safe(self.nvml.nvmlDeviceGetPowerUsage, scale=1e-3)
+
     def _next_change(self, step=None, timeout_s=2.0):
         """(energy mJ, time, intervals) at the next counter change; runs `step` meanwhile if given."""
         start_value, start = self._energy_mj(), self.clock()
@@ -142,29 +148,48 @@ class EnergyMeter:
                 raise RuntimeError("the NVML energy counter did not change within "
                                    f"{timeout_s:g} s; use power sampling")
 
+    @staticmethod
+    def _interval_ms(trace):
+        steps = [b[0] - a[0] for a, b in zip(trace, trace[1:]) if b[0] > a[0]]
+        return 1e3 * statistics.median(steps) if steps else None
+
     def _idle_counter(self, seconds):
+        """Nothing runs; trace = [seconds from start, counter mJ, NVML power reading W] at each change."""
         e0, t0, _ = self._next_change()
-        changes, last = [t0], e0
+        trace, last = [[0.0, e0, self._power_w()]], e0
         while self.clock() - t0 < seconds:
             time.sleep(0.001)
             value = self._energy_mj()
             if value != last:
-                changes.append(self.clock())
+                trace.append([self.clock() - t0, value, self._power_w()])
                 last = value
         e1, t1, _ = self._next_change()
-        changes.append(t1)
-        intervals = [b - a for a, b in zip(changes, changes[1:]) if b > a]
+        trace.append([t1 - t0, e1, self._power_w()])
         return {"duration_s": t1 - t0, "energy_j": (e1 - e0) / 1e3,
-                "counter_update_interval_ms": 1e3 * statistics.median(intervals) if intervals else None}
+                "counter_update_interval_ms": self._interval_ms(trace), "trace": trace}
 
-    def _active_counter(self, step, seconds):
-        e0, t0, _ = self._next_change()
-        passes = 0
-        while self.clock() - t0 < seconds:
+    def _active_counter(self, step, seconds, preroll_s):
+        start = self.clock()
+        while self.clock() - start < preroll_s:  # clocks up before the window opens
+            step()
+        e0, t0, _ = self._next_change(step=step)  # opens on a counter change, the workload still running
+        passes, trace, last, last_poll = 0, [[0.0, e0, self._power_w()]], e0, t0
+        while True:
             step()
             passes += 1
+            now = self.clock()
+            if now - t0 >= seconds:
+                break
+            if now - last_poll >= 0.01:  # a light trace: at most one NVML read per 10 ms
+                last_poll = now
+                value = self._energy_mj()
+                if value != last:
+                    trace.append([now - t0, value, self._power_w()])
+                    last = value
         e1, t1, extra = self._next_change(step=step)
-        return {"duration_s": t1 - t0, "energy_j": (e1 - e0) / 1e3, "batches": passes + extra}
+        trace.append([t1 - t0, e1, self._power_w()])
+        return {"duration_s": t1 - t0, "energy_j": (e1 - e0) / 1e3, "batches": passes + extra,
+                "preroll_s": preroll_s, "counter_update_interval_ms": self._interval_ms(trace), "trace": trace}
 
     # -- power sampling ------------------------------------------------------------------------
     def _sampler(self):
@@ -218,15 +243,15 @@ class EnergyMeter:
                 "batches": passes, "power_samples": n, "preroll_s": preroll_s}
 
     # -- measurement ---------------------------------------------------------------------------
-    def measure(self, step, batch_size, seconds, idle_seconds):
+    def measure(self, step, batch_size, seconds, idle_seconds, preroll_seconds=0.5):
         """Energy of synchronized inference. `step` runs one batch and synchronizes the device."""
         before = self.state()
         if self.method == "total_energy_counter":
             idle = self._idle_counter(idle_seconds)
-            active = self._active_counter(step, seconds)
+            active = self._active_counter(step, seconds, preroll_seconds)
         else:
             idle = self._idle_sampling(idle_seconds)
-            active = self._active_sampling(step, seconds)
+            active = self._active_sampling(step, seconds, max(preroll_seconds, 1.0))
         after = self.state()
         idle_power = idle["energy_j"] / idle["duration_s"]
         energy, duration, batches = active["energy_j"], active["duration_s"], active["batches"]
@@ -245,6 +270,7 @@ class EnergyMeter:
             "energy_per_batch_j": energy / batches,
             "energy_per_example_j": energy / (batches * batch_size),
             "idle_power_w": idle_power,
+            "idle_power_reading_w": (idle.get("trace") or [[None, None, None]])[-1][2],
             "net_average_power_w": net_energy / duration,
             "net_energy_per_batch_j": net_energy / batches,
             "net_energy_per_example_j": net_energy / (batches * batch_size),
