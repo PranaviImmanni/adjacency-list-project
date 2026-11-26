@@ -19,6 +19,19 @@ function; only the floating-point summation order differs.
 Biases are always dense and never pruned. They are counted separately from
 the weight storage.
 
+Adjacency list (adjacency_list, not part of the original sweep's FORMATS):
+each output neuron keeps the list of its incoming edges, (input neuron,
+weight), built from the mask positions like COO / CSR. The lists are packed
+the standard GPU way: one offsets array (where each neuron's list starts),
+one neighbor-index array and one weight array, so the stored bytes are
+4 B per edge value + 8 B per neighbor index + 8 B per offset (the same
+accounting as reports/low_rank_adjacency.csv). A forward pass is computed
+edge by edge with generic PyTorch kernels: gather each edge's source
+activation, multiply by the edge weight, and sum each neuron's list
+(torch.segment_reduce over the offsets). It holds the same numbers as CSR;
+what differs is the computation (graph-style gather and per-list sums vs
+cuSPARSE's sparse-matrix multiply).
+
 Low-rank adapters (LoRA) are optional per layer and always stay separate from
 the stored weight: a layer computes W x + B (A x) + b, with A (rank x in) and
 B (out x rank) dense FP32 (B already includes the alpha / rank scale). They
@@ -33,7 +46,10 @@ from .weight_pruning import apply_mask
 
 FORMATS = ("dense", "dense_mask", "coo", "csr")
 SPARSE_FORMATS = ("coo", "csr")
-FORMAT_LABELS = {"dense": "pruned dense", "dense_mask": "dense+mask", "coo": "COO", "csr": "CSR"}
+ADJACENCY_FORMAT = "adjacency_list"
+ALL_FORMATS = FORMATS + (ADJACENCY_FORMAT,)  # FORMATS stays the original sweep's grid
+FORMAT_LABELS = {"dense": "pruned dense", "dense_mask": "dense+mask", "coo": "COO", "csr": "CSR",
+                 "adjacency_list": "adjacency list"}
 
 
 def _nbytes(t):
@@ -46,6 +62,72 @@ def sparse_from_mask(weight, mask):
     values = weight[mask]
     coo = torch.sparse_coo_tensor(indices, values, weight.shape, check_invariants=True)
     return coo.coalesce()
+
+
+class AdjacencyList:
+    """Weighted adjacency lists of one weight matrix (rows = output neurons).
+
+    Row r's incoming edges are neighbors[offsets[r]:offsets[r + 1]] (input
+    neuron indices, ascending) with weights[offsets[r]:offsets[r + 1]].
+    """
+
+    layout = "adjacency_list"  # never torch.strided: a resident check treats it like a sparse tensor
+
+    def __init__(self, offsets, neighbors, weights, shape):
+        self.offsets, self.neighbors, self.weights = offsets, neighbors, weights
+        self.shape = torch.Size(shape)
+
+    @classmethod
+    def from_mask(cls, weight, mask):
+        """Lists of the retained positions of `mask` (row-major, like COO / CSR), values from `weight`."""
+        if mask.shape != weight.shape or mask.dtype != torch.bool:
+            raise ValueError(f"mask must be bool with shape {tuple(weight.shape)}")
+        weight, mask = weight.detach().cpu(), mask.cpu()
+        positions = mask.nonzero()  # row-major, so each row's neighbors are contiguous and ascending
+        offsets = torch.zeros(weight.shape[0] + 1, dtype=torch.int64)
+        offsets[1:] = mask.sum(dim=1).cumsum(0)
+        lists = cls(offsets, positions[:, 1].contiguous(), weight[mask].clone(), weight.shape)
+        lists.validate()
+        return lists
+
+    def validate(self):
+        """Checked once here, so the forward pass can skip segment_reduce's own (synchronizing) checks."""
+        offsets = self.offsets.cpu()
+        if (offsets.dim() != 1 or len(offsets) != self.shape[0] + 1 or offsets[0] != 0
+                or offsets[-1] != len(self.neighbors) or bool((offsets.diff() < 0).any())
+                or len(self.weights) != len(self.neighbors)):
+            raise ValueError("malformed adjacency list offsets")
+        if len(self.neighbors) and not (0 <= int(self.neighbors.min()) and int(self.neighbors.max()) < self.shape[1]):
+            raise ValueError("adjacency list neighbor index out of range")
+
+    @property
+    def num_edges(self):
+        return len(self.neighbors)
+
+    def to(self, device):
+        return AdjacencyList(self.offsets.to(device), self.neighbors.to(device), self.weights.to(device), self.shape)
+
+    def tensors(self):
+        return [self.weights, self.neighbors, self.offsets]
+
+    def storage_parts(self):
+        return {"values": _nbytes(self.weights), "neighbors": _nbytes(self.neighbors),
+                "offsets": _nbytes(self.offsets)}
+
+    def to_dense(self):
+        dense = torch.zeros(self.shape, dtype=self.weights.dtype)
+        rows = torch.repeat_interleave(torch.arange(self.shape[0]), self.offsets.cpu().diff())
+        dense[rows, self.neighbors.cpu()] = self.weights.cpu()
+        return dense
+
+    def aggregate(self, h):
+        """W h for feature-major activations h (in x batch, contiguous): (out x batch).
+
+        One message per edge (its source activation times its weight), then
+        each output neuron sums its own list; a neuron with no edges gets 0.
+        """
+        messages = h.index_select(0, self.neighbors) * self.weights[:, None]
+        return torch.segment_reduce(messages, "sum", offsets=self.offsets, axis=0, unsafe=True)
 
 
 class StoredLayer:
@@ -64,7 +146,9 @@ class StoredLayer:
     def tensors(self):
         """Every tensor buffer this layer keeps (sparse tensors as their components)."""
         w = self.weight
-        if w.layout == torch.sparse_coo:
+        if isinstance(w, AdjacencyList):
+            out = w.tensors()
+        elif w.layout == torch.sparse_coo:
             out = [w._values(), w._indices()]
         elif w.layout == torch.sparse_csr:
             out = [w.values(), w.col_indices(), w.crow_indices()]
@@ -78,7 +162,11 @@ class StoredLayer:
 
     def storage(self):
         w = self.weight
-        if w.layout == torch.sparse_coo:
+        if isinstance(w, AdjacencyList):
+            values = w.weights
+            parts = w.storage_parts()
+            index_dtype = str(w.neighbors.dtype)
+        elif w.layout == torch.sparse_coo:
             values = w._values()
             parts = {"values": _nbytes(values), "indices": _nbytes(w._indices())}
             index_dtype = str(w._indices().dtype)
@@ -96,7 +184,7 @@ class StoredLayer:
         return {"format": self.storage_format if self.pruned else "dense", "pruned": self.pruned,
                 "shape": list(w.shape), "stored_values": values.numel(),
                 "weight_bytes": sum(parts.values()), "weight_bytes_breakdown": parts,
-                "value_dtype": str(w.dtype), "index_dtype": index_dtype,
+                "value_dtype": str(values.dtype), "index_dtype": index_dtype,
                 "mask_dtype": None if self.mask is None else str(self.mask.dtype),
                 "adapter_rank": None if self.adapter is None else self.adapter[0].shape[0],
                 "adapter_bytes": 0 if self.adapter is None else sum(_nbytes(t) for t in self.adapter),
@@ -130,6 +218,15 @@ class FormatMLP:
 
     def __call__(self, x):
         last = len(self.layers) - 1
+        if self.storage_format == ADJACENCY_FORMAT:
+            h = x.t().contiguous()  # feature-major: each edge gathers one row of h
+            for i, layer in enumerate(self.layers):
+                if isinstance(layer.weight, AdjacencyList):
+                    out = layer.weight.aggregate(h) + layer.bias[:, None]
+                else:  # a layer that is not pruned stays dense
+                    out = torch.addmm(layer.bias[:, None], layer.weight, h)
+                h = torch.relu(out) if i < last else out
+            return h.t()
         if not self.sparse:
             h = x
             for i, layer in enumerate(self.layers):
@@ -162,8 +259,10 @@ def build_format_model(model, masks, storage_format, adapters=None):
     Only the tensors of the requested format are created.
     """
     adapters = adapters or {}
-    if storage_format not in FORMATS:
-        raise ValueError(f"unknown format {storage_format!r} (available: {FORMATS})")
+    if storage_format not in ALL_FORMATS:
+        raise ValueError(f"unknown format {storage_format!r} (available: {ALL_FORMATS})")
+    if storage_format == ADJACENCY_FORMAT and adapters:
+        raise ValueError("adapters are not supported with adjacency lists")
     if not masks and storage_format != "dense":
         raise ValueError("the unpruned model is only stored dense")
     unknown = (set(masks) | set(adapters)) - set(model.layer_names)
@@ -192,6 +291,9 @@ def build_format_model(model, masks, storage_format, adapters=None):
         elif storage_format == "dense_mask":
             stored = StoredLayer(name, weight.clone(), bias, mask.clone(), "dense_mask", pruned=True,
                                  adapter=adapter)
+        elif storage_format == ADJACENCY_FORMAT:
+            stored = StoredLayer(name, AdjacencyList.from_mask(weight, mask), bias, storage_format=storage_format,
+                                 pruned=True)
         else:
             sparse = sparse_from_mask(weight, mask)
             stored = StoredLayer(name, sparse if storage_format == "coo" else sparse.to_sparse_csr(), bias,

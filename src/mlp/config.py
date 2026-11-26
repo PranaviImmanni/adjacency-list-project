@@ -66,3 +66,44 @@ def load_followup_config(path=FOLLOWUP_CONFIG_PATH):
     if set(followup["recovery_sparsities"]) - set(base["sparsities"]):
         raise ValueError(f"{path}: recovery_sparsities must be levels of the original sweep (reused as baselines)")
     return {**base, **followup}
+
+
+COMPARISON_CONFIG_PATH = PROJECT_ROOT / "configs" / "mlp_gpu_comparison.json"
+COMPARISON_KEYS = {
+    "base_config", "pruned_formats", "low_rank_ranks", "low_rank_rules", "low_rank_formats", "energy_seconds",
+    "energy_idle_seconds", "energy_sample_interval_ms",
+}
+
+
+def load_comparison_config(path=COMPARISON_CONFIG_PATH):
+    """The GPU format comparison (adjacency list, low-rank factors, energy) on top of the base config.
+
+    Every setting of the original experiment (checkpoints' seeds, pruning grid,
+    batch sizes, warm-ups, timed passes, repetitions, precision) is inherited
+    unchanged; a comparison key may not override a base key.
+    """
+    from .formats import ALL_FORMATS
+    from .low_rank import FACTOR_FORMATS, FACTOR_RULES
+
+    with open(path) as f:
+        comparison = json.load(f)
+    missing = COMPARISON_KEYS - comparison.keys()
+    unknown = comparison.keys() - COMPARISON_KEYS
+    if missing or unknown:
+        raise ValueError(f"{path}: missing keys {sorted(missing)}, unknown keys {sorted(unknown)}")
+    if set(comparison["pruned_formats"]) - set(ALL_FORMATS) or "dense" not in comparison["pruned_formats"]:
+        raise ValueError(f"{path}: pruned_formats must be among {ALL_FORMATS} and include dense (the reference)")
+    if (set(comparison["low_rank_formats"]) - set(FACTOR_FORMATS)
+            or "factor_dense" not in comparison["low_rank_formats"]):
+        raise ValueError(f"{path}: low_rank_formats must be among {FACTOR_FORMATS} and include factor_dense")
+    for rule in comparison["low_rank_rules"]:
+        if rule.get("rule") not in FACTOR_RULES or (rule["rule"] == "abs_std") != ("k" in rule):
+            raise ValueError(f"{path}: low_rank_rules entries are {{'rule': 'all'}} or {{'rule': 'abs_std', 'k': K}}")
+    if not all(isinstance(r, int) and r > 0 for r in comparison["low_rank_ranks"]):
+        raise ValueError(f"{path}: low_rank_ranks must be positive integers")
+    if comparison["energy_seconds"] <= 0 or comparison["energy_idle_seconds"] <= 0:
+        raise ValueError(f"{path}: energy durations must be positive")
+    base = load_config(PROJECT_ROOT / comparison["base_config"])
+    if comparison.keys() & base.keys():
+        raise ValueError(f"{path}: may not override base settings {sorted(comparison.keys() & base.keys())}")
+    return {**base, **comparison}

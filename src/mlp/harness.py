@@ -28,7 +28,7 @@ import torch
 
 from src.gcn.measurement import reset_peak_memory, synchronize
 
-from .formats import FORMATS, SPARSE_FORMATS, build_format_model
+from .formats import ADJACENCY_FORMAT, ALL_FORMATS, SPARSE_FORMATS, build_format_model
 from .model import checkpoint_identity, load_mlp_checkpoint
 from .weight_pruning import prune_layers
 
@@ -44,7 +44,7 @@ def load_variant(checkpoint_path, method, sparsity, pruning_seed, storage_format
     """One model variant, built on CPU, with only its own format moved to `device`."""
     if method == "none" and (sparsity != 0 or storage_format != "dense"):
         raise ValueError("the original model ('none') is dense at sparsity 0")
-    if storage_format not in FORMATS:
+    if storage_format not in ALL_FORMATS:
         raise ValueError(f"unknown format {storage_format!r}")
     device = torch.device(device)
     model, checkpoint = load_mlp_checkpoint(checkpoint_path)
@@ -97,7 +97,7 @@ def make_batch(x_test, batch_size, device):
 
 def check_resident(variant):
     """Confirm a sparse variant holds no dense weight matrix or mask on the device."""
-    if variant.metadata["format"] not in SPARSE_FORMATS:
+    if variant.metadata["format"] not in SPARSE_FORMATS + (ADJACENCY_FORMAT,):
         return True
     for layer in variant.model.layers:
         if layer.pruned and (layer.weight.layout == torch.strided or layer.mask is not None):

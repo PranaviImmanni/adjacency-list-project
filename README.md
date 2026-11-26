@@ -173,6 +173,19 @@ python scripts/run_mlp_followup.py --experiments finetune protect_fc3 lora int8 
 python scripts/summarize_mlp_followup.py --run cuda1
 ```
 
+### MLP: all formats on the GPU, with energy
+
+Pranavi's adjacency-list and low-rank factor networks, measured on the lab GPU next to dense, dense+mask, COO and
+CSR, with the same checkpoints, seeds, batch sizes, warm-ups and repetitions as the original sweep, plus GPU
+energy from NVML (average power, energy per batch and per example). Design and decisions:
+`docs/mlp_gpu_comparison_plan.md`. On the lab GPU (after `pip install nvidia-ml-py`):
+
+```bash
+python scripts/run_mlp_gpu_comparison.py --stage pilot --seeds 42 --device cuda:1
+python scripts/run_mlp_gpu_comparison.py --stage all --seeds 42 43 44 --device cuda:1   # use tmux
+python scripts/summarize_mlp_gpu_comparison.py --run cuda1
+```
+
 ### Existing utilities
 
 ```bash

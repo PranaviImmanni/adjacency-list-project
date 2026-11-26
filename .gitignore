@@ -8,3 +8,4 @@ checkpoints/*
 results/raw/
 results/mlp/*cpu*/
 results/mlp_followup/*cpu*/
+results/mlp_gpu/*cpu*/

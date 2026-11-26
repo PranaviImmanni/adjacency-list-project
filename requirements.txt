@@ -7,3 +7,4 @@ scipy  # needed by PyG to read the Planetoid (Cora) raw files
 numpy
 matplotlib  # charts in scripts/summarize_gcn_results.py (optional: tables still work without it)
 pytest
+nvidia-ml-py  # NVML energy measurement on the NVIDIA GPU (scripts/run_mlp_gpu_comparison.py)
